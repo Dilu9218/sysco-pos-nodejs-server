@@ -2,8 +2,6 @@ const request = require('supertest');
 const app = require('../app');
 const AdminModel = require('../src/database/models/user.model');
 
-var user = undefined;
-
 function makeid() {
     var text = "";
     var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -12,15 +10,17 @@ function makeid() {
     return text;
 }
 
-beforeAll(() => {
-    // Drop all users
-    AdminModel.deleteMany({}, () => console.log('Cleared User Collection'));
-    // Create a random username
-    user = makeid();
-    console.log(`Username --> ${user}`);
-});
-
 describe('Admin adds a new user', function () {
+
+    var user = undefined;
+
+    beforeAll(() => {
+        // Drop all users
+        AdminModel.deleteMany({}, () => {
+            user = makeid();
+        });
+    });
+
     it('Request to add a user without authorization', function (done) {
         request(app)
             .post('/api/admin/user/add')
@@ -93,6 +93,13 @@ describe('Admin adds a new user', function () {
 });
 
 describe('Admin lists out all the users', function () {
+
+    var user = undefined;
+
+    beforeAll(() => {
+        user = makeid();
+    });
+
     it('Listing out users without authorization', function (done) {
         request(app)
             .get('/api/admin/users')
@@ -109,3 +116,42 @@ describe('Admin lists out all the users', function () {
         catch (e) { }
     });
 });
+
+describe('Admin fetches a user', function () {
+
+    var id = undefined;
+    var user = undefined;
+
+    beforeAll(async (done) => {
+        await AdminModel.findOne({}).then(doc => {
+            id = doc._id;
+            user = doc.username;
+            done();
+        });
+    });
+
+    it('Fetching a user without authorization', function (done) {
+        request(app)
+            .get(`/api/admin/user/${id}`)
+            .expect(403, done);
+    });
+    it('Fetching a user with authorization', function () {
+        return request(app)
+            .get(`/api/admin/user/${id}`)
+            .set('authorization', 'Basic asyuy8a8st6')
+            .expect(200).then(r => {
+                expect(r.body[0].username).toBe(user);
+            });
+    });
+    it('Fetching a user with invalid ID', function (done) {
+        request(app)
+            .get(`/api/admin/user/${id}z`)
+            .set('authorization', 'Basic asyuy8a8st6')
+            .expect(404, done);
+    });
+});
+
+afterAll(() => {
+    console.log('Cleared User Collection after testing');
+    AdminModel.deleteMany({}, () => { });
+})

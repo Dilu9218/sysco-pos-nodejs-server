@@ -30,7 +30,7 @@ router.post('/user/add', (req, res) => {
     }
 });
 
-/** In Progress */
+/** Tested */
 router.get('/users', (req, res) => {
     if (req.headers.authorization) {
         AdminModel
@@ -44,6 +44,22 @@ router.get('/users', (req, res) => {
             })
             .catch(err => {
                 return res.status(404).json({ 'error': 'Cannot fetch any users' });
+            });
+    } else {
+        return res.status(403).json({ error: "Invalid user request ..." });
+    }
+});
+
+/** Tested */
+router.get('/user/:id', (req, res) => {
+    if (req.headers.authorization) {
+        AdminModel
+            .find({ _id: req.params.id })
+            .then(doc => {
+                return res.status(200).json(doc);
+            })
+            .catch(err => {
+                return res.status(404).json({ 'status': 'User not found' });
             });
     } else {
         return res.status(403).json({ error: "Invalid user request ..." });
@@ -76,13 +92,7 @@ router.get('/api/admin/logout', (req, res) => {
         });
 })
 
-router.get('/api/admin/user/:id', (req, res) => {
-    db.collection('col_users').findOne({ _id: ObjectID(req.params.id) }, function (err, result) {
-        if (err) throw err;
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(result));
-    });
-});
+
 
 router.delete('/api/admin/user/:id', (req, res) => {
     var myquery = { _id: ObjectID(req.params.id) };
