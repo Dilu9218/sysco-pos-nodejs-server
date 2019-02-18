@@ -2,19 +2,20 @@ var express = require('express');
 var router = express.Router();
 var AdminModel = require('../database/models/user.model');
 
+/** Tested */
 router.post('/user/add', (req, res) => {
     try {
         if (req.headers.authorization) {
             // TODO: Verify authentication
             let t = new AdminModel(req.body);
-            t.save().then(doc => {
-                res.status(200).json({ 'status': 'User created' });
+            t.save().then(() => {
+                return res.status(200).json({ 'status': 'User created' });
             }).catch(err => {
                 if (err.name === 'MongoError' && err.code === 11000) {
                     return res.status(409).json({ 'error': 'Duplicate user name' });
                 }
                 if (err.name === 'ValidationError') {
-                    return res.status(400).json({ 'error': 'Username is required' });
+                    return res.status(400).json({ 'error': 'Some fields are missing' });
                 }
             });
         } else {
@@ -22,22 +23,31 @@ router.post('/user/add', (req, res) => {
         }
     } catch (e) {
         if (e instanceof TypeError) {
-            res.status(500).json({ error: "Database seems out of our hands ..." });
-        } else if (e instanceof ReferenceError) {
-
+            return res.status(500).json({ error: "Database seems out of our hands ..." });
+        } else {
+            return res.status(501).json({ error: "Something went wrong and we don't know what is it, yet ..." });
         }
     }
 });
 
-router.get('/', (req, res) => {
-    ToDoModel
-        .find({})
-        .then(doc => {
-            res.status(200).json(doc);
-        })
-        .catch(err => {
-            res.status(404).json({ 'error': 'Cannot find any todos' });
-        });
+/** In Progress */
+router.get('/users', (req, res) => {
+    if (req.headers.authorization) {
+        AdminModel
+            .find({})
+            .then(doc => {
+                if (doc.length !== 0) {
+                    return res.status(200).json(doc);
+                } else {
+                    return res.status(204).json({ 'status': 'No users to fetch' });
+                }
+            })
+            .catch(err => {
+                return res.status(404).json({ 'error': 'Cannot fetch any users' });
+            });
+    } else {
+        return res.status(403).json({ error: "Invalid user request ..." });
+    }
 });
 
 router.post('/api/admin/login', (req, res) => {
@@ -65,14 +75,6 @@ router.get('/api/admin/logout', (req, res) => {
             });
         });
 })
-
-router.get('/api/admin/users', (req, res) => {
-    db.collection('col_users').find().toArray(function (err, result) {
-        if (err) throw err;
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(result));
-    });
-});
 
 router.get('/api/admin/user/:id', (req, res) => {
     db.collection('col_users').findOne({ _id: ObjectID(req.params.id) }, function (err, result) {
