@@ -196,6 +196,43 @@ describe('Admin updates a user', function () {
     });
 });
 
+describe('Admin deletes a user', function () {
+
+    var id = undefined;
+
+    beforeAll(async (done) => {
+        let deletableUser = new AdminModel({
+            username: "deletableUser",
+            password: "falsepassword",
+            isAdmin: true
+        });
+        await deletableUser.save().then(doc => {
+            id = doc._id;
+            done();
+        });
+    });
+
+    it('Deleting a user without authorization', function (done) {
+        request(app)
+            .delete(`/api/admin/user/${id}`)
+            .expect(403, done);
+    });
+    it('Deleting a user with authorization', function () {
+        return request(app)
+            .delete(`/api/admin/user/${id}`)
+            .set('authorization', 'Basic asyuy8a8st6')
+            .expect(200).then(r => {
+                expect(String.valueOf(r.body._id)).toBe(String.valueOf(id));
+            });
+    });
+    it('Deleting a user with an invalid ID', function (done) {
+        request(app)
+            .delete(`/api/admin/user/${id}z`)
+            .set('authorization', 'Basic asyuy8a8st6')
+            .expect(404, done);
+    });
+});
+
 afterAll(() => {
     console.log('Cleared User Collection after testing');
     AdminModel.deleteMany({}, () => { });

@@ -80,13 +80,18 @@ router.put('/user/:id', (req, res) => {
     }
 });
 
-router.delete('/api/admin/user/:id', (req, res) => {
-    var myquery = { _id: ObjectID(req.params.id) };
-    db.collection('col_users').deleteOne(myquery, function (err, obj) {
-        if (err) throw err;
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(req.url);
-    });
+/** Tested */
+router.delete('/user/:id', (req, res) => {
+    if (req.headers.authorization) {
+        AdminModel.findOneAndDelete(
+            { _id: req.params.id }).then(doc => {
+                return res.status(200).json(doc);
+            }).catch(er => {
+                return res.status(404).json({ 'status': 'User not found' });
+            });
+    } else {
+        return res.status(403).json({ error: "Invalid user request ..." });
+    }
 });
 
 router.post('/api/admin/login', (req, res) => {
