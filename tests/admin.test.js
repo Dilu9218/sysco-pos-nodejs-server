@@ -143,9 +143,54 @@ describe('Admin fetches a user', function () {
                 expect(r.body[0].username).toBe(user);
             });
     });
-    it('Fetching a user with invalid ID', function (done) {
+    it('Fetching a user with an invalid ID', function (done) {
         request(app)
             .get(`/api/admin/user/${id}z`)
+            .set('authorization', 'Basic asyuy8a8st6')
+            .expect(404, done);
+    });
+});
+
+describe('Admin updates a user', function () {
+
+    var id = undefined;
+    var user = undefined;
+    var newuser = makeid();
+
+    beforeAll(async (done) => {
+        await AdminModel.findOne({}).then(doc => {
+            id = doc._id;
+            user = doc.username;
+            console.log(`Old name - ${user}; New name - ${newuser}`);
+            done();
+        });
+    });
+
+    it('Updating a user without authorization', function (done) {
+        request(app)
+            .put(`/api/admin/user/${id}`)
+            .send({
+                username: newuser
+            })
+            .expect(403, done);
+    });
+    it('Updating a user with authorization', function () {
+        return request(app)
+            .put(`/api/admin/user/${id}`)
+            .set('authorization', 'Basic asyuy8a8st6')
+            .send({
+                username: newuser
+            })
+            .expect(200).then(r => {
+                expect(r.body.username).toBe(newuser);
+            });
+    });
+    it('Updating a user with an invalid ID', function (done) {
+        request(app)
+            .put(`/api/admin/user/${id}z`)
+            .send({
+                username: newuser
+            })
             .set('authorization', 'Basic asyuy8a8st6')
             .expect(404, done);
     });

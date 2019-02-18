@@ -66,6 +66,29 @@ router.get('/user/:id', (req, res) => {
     }
 });
 
+/** Tested */
+router.put('/user/:id', (req, res) => {
+    if (req.headers.authorization) {
+        AdminModel.findOneAndUpdate(
+            { _id: req.params.id }, { username: req.body.username }, { new: true }).then(doc => {
+                return res.status(200).json(doc);
+            }).catch(er => {
+                return res.status(404).json({ 'status': 'User not found' });
+            });
+    } else {
+        return res.status(403).json({ error: "Invalid user request ..." });
+    }
+});
+
+router.delete('/api/admin/user/:id', (req, res) => {
+    var myquery = { _id: ObjectID(req.params.id) };
+    db.collection('col_users').deleteOne(myquery, function (err, obj) {
+        if (err) throw err;
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(req.url);
+    });
+});
+
 router.post('/api/admin/login', (req, res) => {
     if (req.url === '/todos/') {
         db.collection('col_users').insertOne(req.body, function (err, r) {
@@ -91,17 +114,6 @@ router.get('/api/admin/logout', (req, res) => {
             });
         });
 })
-
-
-
-router.delete('/api/admin/user/:id', (req, res) => {
-    var myquery = { _id: ObjectID(req.params.id) };
-    db.collection('col_users').deleteOne(myquery, function (err, obj) {
-        if (err) throw err;
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(req.url);
-    });
-});
 
 router.get('/api/admin/orders', (req, res) => {
     db.collection('col_orders').find().toArray(function (err, result) {
