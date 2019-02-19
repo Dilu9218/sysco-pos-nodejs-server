@@ -1,9 +1,11 @@
 let mongoose = require('mongoose');
 
 let orderSchema = new mongoose.Schema({
-    validOrder: {
-        type: Boolean
-    }
+    productID: String,
+    productTitle: String,
+    availableQty: Number,
+    description: String,
+    price: Number
 });
 
 module.exports = mongoose.model('Order', orderSchema);
