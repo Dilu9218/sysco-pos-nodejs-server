@@ -20,7 +20,7 @@ describe('Creating a new User', function () {
         gUser = makeid();
     });
 
-    it('Regiter user with valid data', (done) => {
+    it('Register user with valid data', (done) => {
         request(app)
             .post('/api/user/register')
             .send({
@@ -35,7 +35,7 @@ describe('Creating a new User', function () {
             .post('/api/user/register')
             .expect(406, done);
     });
-    it('Regiter user without password', function (done) {
+    it('Register user without password', function (done) {
         request(app)
             .post('/api/user/register')
             .send({
@@ -44,7 +44,7 @@ describe('Creating a new User', function () {
             })
             .expect(406, done);
     });
-    it('Regiter user without username', function (done) {
+    it('Register user without username', function (done) {
         request(app)
             .post('/api/user/register')
             .send({
@@ -53,7 +53,7 @@ describe('Creating a new User', function () {
             })
             .expect(406, done);
     });
-    it('Regiter user with same username', function (done) {
+    it('Register user with same username', function (done) {
         request(app)
             .post('/api/user/register')
             .send({
@@ -61,7 +61,14 @@ describe('Creating a new User', function () {
                 password,
                 isAdmin: false
             })
-            .expect(200, done); // 406
+            .expect('Content-Type', /json/).then(r => {
+                if(r.body.token) {
+                    expect(200);
+                } else {
+                    expect(409);
+                }
+                done();
+            });
     });
 });
 

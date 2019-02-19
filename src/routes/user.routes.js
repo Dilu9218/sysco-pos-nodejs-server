@@ -4,7 +4,6 @@ var bcrypt = require('bcryptjs');
 var config = require('../auth/config');
 var router = express.Router();
 
-var ValidateToken = require('../auth/verifytoken');
 var UserModel = require('../database/models/user.model');
 
 /** Tested */
@@ -17,10 +16,18 @@ router.post('/register', function (req, res) {
             isAdmin: false
         });
         u.save().then(doc => {
-            var token = jwt.sign({ id: doc._id }, config.secret, {
-                expiresIn: (24 * 60 * 60)
+            UserModel.find({ username: req.body.username }).then(docs => {
+                if (docs.length === 1) {
+                    var token = jwt.sign({ id: doc._id }, config.secret, {
+                        expiresIn: (24 * 60 * 60)
+                    });
+                    return res.status(200).send({ 'status': 'User created successfully', 'token': token });        
+                } else {
+                    return res.status(409).json({ 'error': 'Duplicate user name' });    
+                }
+            }).catch(e => {
+                return res.status(409).json({ 'error': 'Duplicate user name' });
             });
-            return res.status(200).send({ 'status': 'User created successfully', 'token': token });
         }).catch(err => {
             if (err.name === 'MongoError' && err.code === 11000) {
                 return res.status(409).json({ 'error': 'Duplicate user name' });
