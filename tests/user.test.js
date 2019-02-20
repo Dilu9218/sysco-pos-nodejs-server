@@ -6,7 +6,7 @@ var ltoken = undefined;
 var gUser = undefined;
 var password = 'falsepassword';
 
-function makeid() {
+function generateUserName() {
     var text = "";
     var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     for (var i = 0; i < 8; i++)
@@ -14,22 +14,17 @@ function makeid() {
     return text;
 }
 
+beforeAll(async (done) => {
+    // First clear the whole user database
+    await UserModel.deleteMany({}, (err) => {
+        gUser = generateUserName();
+        console.debug(`Cleared user collection. UUT is ${gUser}. Proceed with testing`);
+        done();
+    });
+});
+
 describe('Creating a new User', function () {
 
-    beforeAll(() => {
-        gUser = makeid();
-    });
-
-    it('Register user with valid data', (done) => {
-        request(app)
-            .post('/api/user/register')
-            .send({
-                username: gUser,
-                password,
-                isAdmin: false
-            })
-            .expect(200, done);
-    });
     it('Register new user without any content', function (done) {
         request(app)
             .post('/api/user/register')
@@ -53,6 +48,16 @@ describe('Creating a new User', function () {
             })
             .expect(406, done);
     });
+    it('Register user with valid data', (done) => {
+        request(app)
+            .post('/api/user/register')
+            .send({
+                username: gUser,
+                password,
+                isAdmin: false
+            })
+            .expect(200, done);
+    });
     it('Register user with same username', function (done) {
         request(app)
             .post('/api/user/register')
@@ -61,14 +66,7 @@ describe('Creating a new User', function () {
                 password,
                 isAdmin: false
             })
-            .expect('Content-Type', /json/).then(r => {
-                if(r.body.token) {
-                    expect(200);
-                } else {
-                    expect(409);
-                }
-                done();
-            });
+            .expect(409, done);
     });
 });
 
@@ -105,7 +103,7 @@ describe('User tries to log in', function () {
         request(app)
             .post('/api/user/login')
             .send({
-                password
+                password,
             })
             .expect(406, done);
     });

@@ -21,7 +21,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Define routes
-app.use('/api/todos', todos);
+app.use('/api/tests', todos);
 app.use('/api/admin', admin);
 app.use('/api/user', user);
 app.use('/api/order', order);

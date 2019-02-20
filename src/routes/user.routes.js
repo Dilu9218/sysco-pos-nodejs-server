@@ -21,9 +21,9 @@ router.post('/register', function (req, res) {
                     var token = jwt.sign({ id: doc._id }, config.secret, {
                         expiresIn: (24 * 60 * 60)
                     });
-                    return res.status(200).send({ 'status': 'User created successfully', 'token': token });        
+                    return res.status(200).send({ 'status': 'User created successfully', 'token': token });
                 } else {
-                    return res.status(409).json({ 'error': 'Duplicate user name' });    
+                    return res.status(409).json({ 'error': 'Duplicate user name' });
                 }
             }).catch(e => {
                 return res.status(409).json({ 'error': 'Duplicate user name' });
