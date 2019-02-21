@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const path = require('path')
 require('./src/database/database');
 
-var todos = require('./src/routes/test.routes');
+var tests = require('./src/routes/test.routes');
 var admin = require('./src/routes/admin.routes');
 var user = require('./src/routes/user.routes');
 var order = require('./src/routes/order.routes');
@@ -21,7 +21,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Define routes
-app.use('/api/tests', todos);
+app.use('/api/tests', tests);
 app.use('/api/admin', admin);
 app.use('/api/user', user);
 app.use('/api/order', order);

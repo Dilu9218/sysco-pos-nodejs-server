@@ -1,11 +1,4 @@
 let mongoose = require('mongoose');
-
-let orderSchema = new mongoose.Schema({
-    productID: String,
-    productTitle: String,
-    availableQty: Number,
-    description: String,
-    price: Number
-});
+let orderSchema = require('./schemas/order.schema');
 
 module.exports = mongoose.model('Order', orderSchema);
