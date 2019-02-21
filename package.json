@@ -16,9 +16,9 @@
   },
   "devDependencies": {},
   "scripts": {
-    "test": "jest --detectOpenHandles --verbose",
+    "test": "jest --detectOpenHandles --verbose --forceExit",
     "start": "nodemon server.js"
   },
-  "author": "",
+  "author": "Padmal",
   "license": "ISC"
 }

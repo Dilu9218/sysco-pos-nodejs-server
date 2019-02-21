@@ -13,6 +13,7 @@ var gItemID = undefined;
 var gCart = undefined;
 var gOrderID = undefined;
 var gItemList = undefined;
+var lOrderID = undefined;
 
 function generateDescription() {
     var text = "";
@@ -357,9 +358,7 @@ describe('Fetches an order', function () {
     });
 });
 
-describe('Updates an order', function () {
-
-    var currentOrderID = undefined;
+describe('Updates an order and Delete', function () {
 
     beforeAll(async (done) => {
         let testItem1 = new ItemModel({
@@ -377,12 +376,12 @@ describe('Updates an order', function () {
             price: 899.50
         });
         let testOrder = new OrderModel({
-            cartID: 'THISCARTDOESNOTEXISTS'
+            cartID: gUserID
         });
         var itemz = [testItem1, testItem2];
         await ItemModel.insertMany(itemz).then(docs => {
             testOrder.save().then(doc => {
-                currentOrderID = doc._id;
+                lOrderID = doc._id;
                 console.log('Created two test items and a order');
                 done();
             });
@@ -391,7 +390,7 @@ describe('Updates an order', function () {
 
     it('Adds an item to an order with proper authorization', function (done) {
         request(app)
-            .put(`/api/order/order/${currentOrderID}`)
+            .put(`/api/order/order/${lOrderID}`)
             .set('x-access-token', gToken)
             .send({
                 productID: 'AA-FIR-ST1',
@@ -404,7 +403,7 @@ describe('Updates an order', function () {
     });
     it('Adds another item to the same order with proper authorization', function (done) {
         request(app)
-            .put(`/api/order/order/${currentOrderID}`)
+            .put(`/api/order/order/${lOrderID}`)
             .set('x-access-token', gToken)
             .send({
                 productID: 'BB-SEC-OND',
@@ -417,7 +416,7 @@ describe('Updates an order', function () {
     });
     it('Adds firstly added item again to the same order with proper authorization', function (done) {
         request(app)
-            .put(`/api/order/order/${currentOrderID}`)
+            .put(`/api/order/order/${lOrderID}`)
             .set('x-access-token', gToken)
             .send({
                 productID: 'AA-FIR-ST1',
@@ -430,7 +429,7 @@ describe('Updates an order', function () {
     });
     it('Adds item to a non existing order with proper authorization', function (done) {
         request(app)
-            .put(`/api/order/order/${gOrderID}z`)
+            .put(`/api/order/order/${lOrderID}z`)
             .set('x-access-token', gToken)
             .send({
                 productID: 'FH-Q9J-5FO',
@@ -440,7 +439,7 @@ describe('Updates an order', function () {
     });
     it('Adds a non existing item to an order with proper authorization', function (done) {
         request(app)
-            .put(`/api/order/order/${gOrderID}`)
+            .put(`/api/order/order/${lOrderID}`)
             .set('x-access-token', gToken)
             .send({
                 productID: 'DO-ESN-OTE',
@@ -450,14 +449,102 @@ describe('Updates an order', function () {
     });
 
     afterAll(async (done) => {
-        await OrderModel.findOneAndDelete({ _id: currentOrderID }).then(res => {
-            ItemModel.findOneAndDelete({ productID: 'AA-FIR-ST1' }).then(res => {
-                ItemModel.findOneAndDelete({ productID: 'BB-SEC-OND' }).then(res => {
-                    console.log('Deleted test items and orders');
-                    done();
-                });
+        await ItemModel.findOneAndDelete({ productID: 'AA-FIR-ST1' }).then(res => {
+            ItemModel.findOneAndDelete({ productID: 'BB-SEC-OND' }).then(res => {
+                console.log('Deleted test items in orders');
+                done();
             });
         });
+    });
+});
+
+describe('User fetches a list of orders', function () {
+
+    beforeAll(async (done) => {
+        let testItem1 = new ItemModel({
+            productID: 'CC-FIR-ST1',
+            productTitle: "Test Item Three",
+            quantity: 50,
+            description: "This is the third test item created",
+            price: 89.00
+        });
+        let testItem2 = new ItemModel({
+            productID: 'DD-SEC-OND',
+            productTitle: "Test Item Four",
+            quantity: 34,
+            description: "This is the fourth test item created",
+            price: 175.50
+        });
+        var itemz = [testItem1, testItem2];
+        let testOrder = new OrderModel({
+            cartID: gUserID,
+            items: itemz
+        });
+        await ItemModel.insertMany(itemz).then(docs => {
+            testOrder.save().then(doc => {
+                lOrderID = doc._id;
+                done();
+            });
+        });
+    });
+
+    it('Fetches a set of orders related to user with valid authorization', function (done) {
+        request(app)
+            .get('/api/order/itemlist')
+            .set('x-access-token', gToken)
+            .expect(200).then(res => {
+                expect(res.body.length).toBe(2);
+                expect(res.body[1].items[1].productID).toBe('DD-SEC-OND');
+                expect(res.body[0].items[0].productID).toBe('BB-SEC-OND');
+                done();
+            });
+    });
+    it('Fetches a set of orders with invalid authorization', function (done) {
+        request(app)
+            .get('/api/order/itemlist')
+            .set('x-access-token', gToken + 'z')
+            .expect(500, done);
+    });
+    it('Fetches a set of orders with no authorization', function (done) {
+        request(app)
+            .get('/api/order/itemlist')
+            .expect(403, done);
+    });
+
+    afterAll(async (done) => {
+        await ItemModel.findOneAndDelete({ productID: 'CC-FIR-ST1' }).then(res => {
+            ItemModel.findOneAndDelete({ productID: 'DD-SEC-OND' }).then(res => {
+                console.log('Deleted test items in orderlist');
+                done();
+            });
+        });
+    });
+});
+
+describe('Deletes an order', function () {
+
+    it('Deletes the order with no authorization', function (done) {
+        request(app)
+            .delete(`/api/order/order/${lOrderID}`)
+            .expect(403, done);
+    });
+    it('Deletes the order with invalid authorization', function (done) {
+        request(app)
+            .delete(`/api/order/order/${lOrderID}`)
+            .set('x-access-token', gToken + 'z')
+            .expect(500, done);
+    });
+    it('Deletes the order with valid authorization', function (done) {
+        request(app)
+            .delete(`/api/order/order/${lOrderID}`)
+            .set('x-access-token', gToken)
+            .expect(200, done);
+    });
+    it('Deletes a non existing order with valid authorization', function (done) {
+        request(app)
+            .delete(`/api/order/order/${lOrderID}z`)
+            .set('x-access-token', gToken)
+            .expect(404, done);
     });
 });
 
