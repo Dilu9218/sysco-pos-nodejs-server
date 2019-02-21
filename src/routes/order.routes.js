@@ -15,7 +15,17 @@ var CartModel = require('../database/models/cart.model');
         |-- Item
 */
 
-// Creates a new order list ##TESTED
+function isThatInIt(That, It) {
+    var index = -1;
+    for (var i = 0; i < It.length; i++) {
+        if (It[i].productID === That) {
+            index = i;
+        }
+    }
+    return index;
+}
+
+// Creates a new order list ###################################################
 router.post('/cart/new', VerifyToken, (req, res, next) => {
     // Fetch the new cart details
     let cart = {};
@@ -45,7 +55,7 @@ router.post('/cart/new', VerifyToken, (req, res, next) => {
     });
 });
 
-// Gets an order list ##TESTED
+// Gets an order list #########################################################
 router.get('/cart/:id', VerifyToken, (req, res, next) => {
     CartModel
         .findOne({ _id: req.params.id })
@@ -57,7 +67,17 @@ router.get('/cart/:id', VerifyToken, (req, res, next) => {
         });
 });
 
-// Updates an order list
+// Deletes an order list ######################################################
+router.delete('/cart/:id', VerifyToken, (req, res, next) => {
+    CartModel.findOneAndDelete(
+        { _id: req.params.id }).then(doc => {
+            return res.status(200).json(doc);
+        }).catch(er => {
+            return res.status(404).json({ 'status': 'Order list not found' });
+        });
+});
+
+// Updates an order list ??????????????????????????????????????????????????????
 router.put('/cart/:id', (req, res) => {
     CartModel.findOneAndUpdate(
         { _id: req.params.id }, req.body, { new: true }).then(doc => {
@@ -67,34 +87,20 @@ router.put('/cart/:id', (req, res) => {
         });
 });
 
-// Deletes an order list
-router.delete('/cart/:id', (req, res) => {
-    CartModel.findOneAndDelete(
-        { _id: req.params.id }).then(doc => {
-            return res.status(200).json(doc);
-        }).catch(er => {
-            return res.status(404).json({ 'status': 'Order list not found' });
-        });
+// Creates a new order ########################################################
+router.post('/order/new', VerifyToken, (req, res, next) => {
+    let o = new OrderModel(req.body);
+    o.save().then(doc => {
+        res.status(200).json({ id: doc._id });
+    }).catch(er => {
+        res.status(400).send(er);
+    });
 });
 
-// Creates a new order
-router.post('/order/new', (req, res) => {
-    if (req.body.orders) {
-        let o = new OrderModel(req.body);
-        o.save().then(doc => {
-            res.status(200).json({ id: doc._id });
-        }).catch(er => {
-            res.status(400).send(er);
-        });
-    } else {
-        res.status(404).json({ 'error': 'Data missing' });
-    }
-});
-
-// Gets an order
-router.get('/order/:id', (req, res) => {
+// Gets an order #############################################################
+router.get('/order/:id', VerifyToken, (req, res, next) => {
     OrderModel
-        .find({ _id: req.params.id })
+        .findOne({ _id: req.params.id })
         .then(doc => {
             res.status(200).json(doc);
         })
@@ -103,14 +109,46 @@ router.get('/order/:id', (req, res) => {
         });
 });
 
-// Updates an order
-router.put('/order/:id', (req, res) => {
-    OrderModel.findOneAndUpdate(
-        { _id: req.params.id }, req.body, { new: true }).then(doc => {
-            return res.status(200).json(doc);
-        }).catch(er => {
-            return res.status(404).json({ 'status': 'Order list not found' });
+// Updates an order ###########################################################
+router.put('/order/:id', VerifyToken, (req, res, next) => {
+    // First find the specific order and save the item list
+    OrderModel.findOne({ _id: req.params.id }).then(order => {
+        var itemList = order.items;
+        var index = isThatInIt(req.body.productID, itemList);
+        // Fetch the item from item pool
+        ItemModel.findOne({ productID: req.body.productID }).then(item => {
+            // We need to update the global item quantity; so calculate the new quantity
+            let newQuantity = item.quantity - req.body.quantity;
+            if (index >= 0) { // If the item is already there, update its count without adding a new item to the list
+                itemList[index].quantity += req.body.quantity;
+            } else {
+                // Clone the item so that we can add it to our order as a seperate item
+                let newItem = item;
+                // Set it's quantity as the purchased quantity
+                newItem.quantity = req.body.quantity;
+                // Add the new item to the item list in our order
+                itemList.unshift(newItem);
+            }
+            // Update our order with the new item list
+            OrderModel.findOneAndUpdate({ _id: req.params.id }, { $set: { items: itemList } }, { new: true })
+                .then(newOrder => {
+                    // Now that we have updated our order, update the global item properties
+                    ItemModel.findOneAndUpdate({ productID: req.body.productID }, { $set: { quantity: newQuantity } }, { new: true })
+                        .then(updatedItem => {
+                            return res.status(200).json(newOrder);
+                        }).catch(err => {
+                            return res.status(500).json({ 'status': 'Error updating item' });
+                        });
+                }).catch(err => {
+                    return res.status(500).json({ 'status': 'Error adding item to list' });
+                });
+        }).catch(err => {
+            // Don't worry this won't happen as I will handle this validation from front end
+            return res.status(404).json({ 'status': 'Item not found' });
         });
+    }).catch(err => {
+        return res.status(404).json({ 'status': 'Order list not found' });
+    });
 });
 
 // Deletes an order
@@ -123,7 +161,7 @@ router.delete('/order/:id', (req, res) => {
         });
 });
 
-// Creates a new item
+// Creates a new item #########################################################
 router.post('/item/new', VerifyToken, (req, res, next) => {
     let o = new ItemModel(req.body);
     o.save().then(doc => {
@@ -133,10 +171,10 @@ router.post('/item/new', VerifyToken, (req, res, next) => {
     });
 });
 
-// Gets an item
+// Gets an item ###############################################################
 router.get('/item/:id', VerifyToken, (req, res, next) => {
     ItemModel
-        .find({ _id: req.params.id })
+        .findOne({ _id: req.params.id })
         .then(doc => {
             res.status(200).json(doc);
         })
@@ -145,8 +183,8 @@ router.get('/item/:id', VerifyToken, (req, res, next) => {
         });
 });
 
-// Updates an item
-router.put('/item/:id', (req, res) => {
+// Updates an item ############################################################
+router.put('/item/:id', VerifyToken, (req, res, next) => {
     ItemModel.findOneAndUpdate(
         { _id: req.params.id }, req.body, { new: true }).then(doc => {
             return res.status(200).json(doc);
@@ -155,14 +193,14 @@ router.put('/item/:id', (req, res) => {
         });
 });
 
-// Deletes an item
-router.delete('/item/:id', (req, res) => {
-    ItemModel.findOneAndDelete(
-        { _id: req.params.id }).then(doc => {
-            return res.status(200).json(doc);
-        }).catch(er => {
-            return res.status(404).json({ 'status': 'Order list not found' });
-        });
+// Gets a list of items in the database #######################################
+router.get('/items', VerifyToken, (req, res, next) => {
+    ItemModel.find({}).then(docs => {
+        return res.status(200).json(docs);
+    }).catch(err => {
+        console.error(err);
+        return res.status(404).json({ 'status': 'No items found' });
+    });
 });
 
 module.exports = router
