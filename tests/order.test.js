@@ -307,9 +307,6 @@ describe('Creates an order', function () {
         request(app)
             .post('/api/order/order/new')
             .set('x-access-token', gToken)
-            .send({
-                cartID: gCart
-            })
             .expect(200).then(r => {
                 gOrderID = r.body.id;
                 done();
@@ -335,7 +332,7 @@ describe('Fetches an order', function () {
             .get(`/api/order/order/${gOrderID}`)
             .set('x-access-token', gToken)
             .expect(200).then(r => {
-                expect(r.body.cartID).toBe(gCart);
+                expect(JSON.stringify(r.body.cartID)).toBe(JSON.stringify(gUserID));
                 done();
             });
     });
@@ -356,9 +353,15 @@ describe('Fetches an order', function () {
             .set('x-access-token', gToken + 'z')
             .expect(500, done);
     });
+
+    afterAll(async (done) => {
+        OrderModel.deleteMany({ cartID: gUserID }).then(res => {
+            done();
+        });
+    });
 });
 
-describe('Updates an order and Delete', function () {
+describe('Updates an order', function () {
 
     beforeAll(async (done) => {
         let testItem1 = new ItemModel({
