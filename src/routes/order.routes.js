@@ -3,7 +3,6 @@ var router = express.Router();
 var VerifyToken = require('../auth/verifytoken');
 var ItemModel = require('../database/models/item.model');
 var OrderModel = require('../database/models/order.model');
-var CartModel = require('../database/models/cart.model');
 
 /*
 - Cart

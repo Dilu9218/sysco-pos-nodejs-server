@@ -10,9 +10,7 @@ var gToken = undefined;
 var gUser = undefined;
 var gUserID = undefined;
 var gItemID = undefined;
-var gCart = undefined;
 var gOrderID = undefined;
-var gItemList = undefined;
 var lOrderID = undefined;
 
 function generateDescription() {
@@ -121,6 +119,19 @@ describe('Adding new items to database', function () {
                 "price": parseInt(Math.random() * 1000) / 100
             })
             .expect(403, done);
+    });
+    it('Adds an item with bogus data proper authorization', function (done) {
+        request(app)
+            .post('/api/order/item/new')
+            .set('x-access-token', gToken)
+            .send({
+                "productID": generateItemCode(),
+                "productTitle": generateUserName(),
+                "quantity": 'Invalid',
+                "description": generateDescription(),
+                "price": parseInt(Math.random() * 1000) / 100
+            })
+            .expect(400, done);
     });
 });
 
