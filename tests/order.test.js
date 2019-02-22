@@ -231,7 +231,7 @@ describe('Creates an order', function () {
             .post('/api/order/order/new')
             .set('x-access-token', gToken)
             .expect(200).then(r => {
-                gOrderID = r.body.id;
+                gOrderID = r.body._id;
                 done();
             });
     });

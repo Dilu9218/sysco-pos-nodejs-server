@@ -47,10 +47,11 @@ router.get('/itemlist', VerifyToken, (req, res, next) => {
 // Creates a new order ########################################################
 router.post('/order/new', VerifyToken, (req, res, next) => {
     let o = new OrderModel({
-        cartID: req._id
+        cartID: req._id,
+        items: []
     });
     o.save().then(doc => {
-        res.status(200).json({ id: doc._id });
+        res.status(200).json(doc);
     }).catch(er => {
         res.status(400).send(er);
     });
