@@ -35,58 +35,6 @@ function isOrderInList(Order, List) {
     return index;
 }
 
-// Creates a new order list ###################################################
-router.post('/cart/new', VerifyToken, (req, res, next) => {
-    // Fetch the new cart details
-    let cart = {};
-    // Attach current user ID to it
-    cart.userID = req._id;
-    // Save the cart in DB
-    let o = new CartModel(cart);
-    o.save().then(doc => {
-        res.status(201).json({
-            status: 'Cart created succefully',
-            id: doc._id
-        });
-    }).catch(er => {
-        // A cart already exists for the specified user
-        if (er.code === 11000) {
-            // Find the cart ID and send it to user
-            CartModel.findOne({ userID: req._id }).then(doc => {
-                res.status(200).json({
-                    status: 'A cart already exists',
-                    id: doc._id
-                });
-            });
-        } else {
-            console.error(er.code);
-            res.status(400).send(er);
-        }
-    });
-});
-
-// Gets an order list #########################################################
-router.get('/cart/:id', VerifyToken, (req, res, next) => {
-    CartModel
-        .findOne({ _id: req.params.id })
-        .then(doc => {
-            res.status(200).json(doc);
-        })
-        .catch(er => {
-            res.status(404).json({ 'error': 'Cannot find such order list' });
-        });
-});
-
-// Deletes an order list ######################################################
-router.delete('/cart/:id', VerifyToken, (req, res, next) => {
-    CartModel.findOneAndDelete(
-        { _id: req.params.id }).then(doc => {
-            return res.status(200).json(doc);
-        }).catch(er => {
-            return res.status(404).json({ 'status': 'Order list not found' });
-        });
-});
-
 // Fetches a list of orders ###################################################
 router.get('/itemlist', VerifyToken, (req, res, next) => {
     // Each order will have userID as it's cart ID
