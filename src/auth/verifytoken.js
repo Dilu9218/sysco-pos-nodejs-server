@@ -12,8 +12,12 @@ function ValidateToken(req, res, next) {
                 return res.status(500).send({ error: 'Invalid token' });
             } else {
                 req._id = decoded.id;
-                user.findById(decoded.id, (err, doc) => {
-                    req._admin = doc.isAdmin;
+                user.find({ _id: decoded.id }, (err, doc) => {
+                    if (doc !== null) {
+                        req._admin = doc.isAdmin;
+                    } else {
+                        req._admin = false;
+                    }
                     next();
                 });
             }

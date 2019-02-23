@@ -69,6 +69,34 @@ router.get('/order/:id', VerifyToken, (req, res, next) => {
         });
 });
 
+router.post('/order/:id', VerifyToken, (req, res, next) => {
+    // Fetch the item from item pool
+    ItemModel.findOne({ productID: req.body.productID }).then(item => {
+        // We need to update the global item quantity; so calculate the new quantity
+        let newQuantity = item.quantity - req.body.quantity;
+        // Clone the item so that we can add it to our order as a seperate item
+        let newItem = item;
+        // Set it's quantity as the purchased quantity
+        newItem.quantity = req.body.quantity;
+        // Update our order with the new item list
+        OrderModel.findOneAndUpdate({ _id: req.params.id }, { $push: { items: newItem } }, { new: true })
+            .then(newOrder => {
+                // Now that we have updated our order, update the global item properties
+                ItemModel.findOneAndUpdate({ productID: req.body.productID }, { $set: { quantity: newQuantity } }, { new: true })
+                    .then(updatedItem => {
+                        return res.status(200).json(newOrder);
+                    }).catch(err => {
+                        return res.status(500).json({ 'status': 'Error updating item' });
+                    });
+            }).catch(err => {
+                return res.status(500).json({ 'status': 'Error adding item to list' });
+            });
+    }).catch(err => {
+        // Don't worry this won't happen as I will handle this validation from front end
+        return res.status(404).json({ 'status': 'Item not found' });
+    });
+});
+
 // Updates an order ###########################################################
 // Pick the order ID number, Send the item as {productID: __ID__, quantity: __n__}
 // This route will add the item to item list and updates the order
