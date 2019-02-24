@@ -21,7 +21,8 @@
   "devDependencies": {},
   "scripts": {
     "test": "jest --detectOpenHandles --verbose --forceExit",
-    "start": "nodemon server.js"
+    "start": "node server.js",
+    "mystart": "nodemon server.js"
   },
   "author": "Padmal",
   "license": "ISC"
