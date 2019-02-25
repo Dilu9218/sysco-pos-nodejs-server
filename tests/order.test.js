@@ -84,7 +84,7 @@ describe('Adding new items to database', function () {
 
     it('Adds an item with proper authorization', function (done) {
         request(app)
-            .post('/api/order/item/new')
+            .post('/api/item/new')
             .set('x-access-token', gToken)
             .send({
                 "productID": generateItemCode(),
@@ -97,7 +97,7 @@ describe('Adding new items to database', function () {
     });
     it('Adds an item with invalid token', function (done) {
         request(app)
-            .post('/api/order/item/new')
+            .post('/api/item/new')
             .set('x-access-token', gToken + 'z')
             .send({
                 "productID": generateItemCode(),
@@ -110,7 +110,7 @@ describe('Adding new items to database', function () {
     });
     it('Adds an item without authorization', function (done) {
         request(app)
-            .post('/api/order/item/new')
+            .post('/api/item/new')
             .send({
                 "productID": generateItemCode(),
                 "productTitle": generateUserName(),
@@ -122,7 +122,7 @@ describe('Adding new items to database', function () {
     });
     it('Adds an item with bogus data proper authorization', function (done) {
         request(app)
-            .post('/api/order/item/new')
+            .post('/api/item/new')
             .set('x-access-token', gToken)
             .send({
                 "productID": generateItemCode(),
@@ -139,7 +139,7 @@ describe('Fetching an item', function () {
 
     it('Fetch an item from ID', function (done) {
         request(app)
-            .get(`/api/order/item/${gItemID}`)
+            .get(`/api/item/item/${gItemID}`)
             .set('x-access-token', gToken)
             .expect(200).then(d => {
                 expect(d.body.productID).toBe('TH-ISI-STS');
@@ -148,18 +148,18 @@ describe('Fetching an item', function () {
     });
     it('Fetch an item which is not in database', function (done) {
         request(app)
-            .get(`/api/order/item/${gItemID}z`)
+            .get(`/api/item/item/${gItemID}z`)
             .set('x-access-token', gToken)
             .expect(404, done);
     });
     it('Fetch an item from ID without authorization', function (done) {
         request(app)
-            .get(`/api/order/item/${gItemID}`)
+            .get(`/api/item/item/${gItemID}`)
             .expect(403, done);
     });
     it('Fetch an item from ID with invalid token', function (done) {
         request(app)
-            .get(`/api/order/item/${gItemID}`)
+            .get(`/api/item/item/${gItemID}`)
             .set('x-access-token', gToken + 'z')
             .expect(500, done);
     });
@@ -169,7 +169,7 @@ describe('Updating an item', function () {
 
     it('Update an item from ID', function (done) {
         request(app)
-            .put(`/api/order/item/${gItemID}`)
+            .put(`/api/item/item/${gItemID}`)
             .set('x-access-token', gToken)
             .send({
                 quantity: 500
@@ -182,18 +182,18 @@ describe('Updating an item', function () {
     });
     it('Update an item which is not in database', function (done) {
         request(app)
-            .put(`/api/order/item/${gItemID}z`)
+            .put(`/api/item/item/${gItemID}z`)
             .set('x-access-token', gToken)
             .expect(404, done);
     });
     it('Update an item from ID without authorization', function (done) {
         request(app)
-            .put(`/api/order/item/${gItemID}`)
+            .put(`/api/item/item/${gItemID}`)
             .expect(403, done);
     });
     it('Update an item from ID with invalid token', function (done) {
         request(app)
-            .put(`/api/order/item/${gItemID}`)
+            .put(`/api/item/item/${gItemID}`)
             .set('x-access-token', gToken + 'z')
             .expect(500, done);
     });
@@ -203,7 +203,7 @@ describe('Fetching the item list', function () {
 
     it('Fetch item list with valid credentials', function (done) {
         request(app)
-            .get('/api/order/items')
+            .get('/api/item/list')
             .set('x-access-token', gToken)
             .expect(200).then(d => {
                 gItemList = d;
@@ -213,12 +213,12 @@ describe('Fetching the item list', function () {
     });
     it('Fetch item list without authorization', function (done) {
         request(app)
-            .get('/api/order/items')
+            .get('/api/item/list')
             .expect(403, done);
     });
     it('Fetch item list with an invalid token', function (done) {
         request(app)
-            .get('/api/order/items')
+            .get('/api/item/list')
             .set('x-access-token', gToken + 'z')
             .expect(500, done);
     });
@@ -228,7 +228,7 @@ describe('Creates an order', function () {
 
     it('Creates a blank order with proper authorization', function (done) {
         request(app)
-            .post('/api/order/order/new')
+            .post('/api/order/new')
             .set('x-access-token', gToken)
             .expect(200).then(r => {
                 gOrderID = r.body._id;
@@ -237,12 +237,12 @@ describe('Creates an order', function () {
     });
     it('Creates an order without authorization', function (done) {
         request(app)
-            .post('/api/order/order/new')
+            .post('/api/order/new')
             .expect(403, done);
     });
     it('Creates an order with invalid token', function (done) {
         request(app)
-            .post('/api/order/order/new')
+            .post('/api/order/new')
             .set('x-access-token', gToken + 'z')
             .expect(500, done);
     });
@@ -416,7 +416,7 @@ describe('User fetches a list of orders', function () {
 
     it('Fetches a set of orders related to user with valid authorization', function (done) {
         request(app)
-            .get('/api/order/itemlist')
+            .get('/api/order/list')
             .set('x-access-token', gToken)
             .expect(200).then(res => {
                 expect(res.body.length).toBe(2);
@@ -427,13 +427,13 @@ describe('User fetches a list of orders', function () {
     });
     it('Fetches a set of orders with invalid authorization', function (done) {
         request(app)
-            .get('/api/order/itemlist')
+            .get('/api/order/list')
             .set('x-access-token', gToken + 'z')
             .expect(500, done);
     });
     it('Fetches a set of orders with no authorization', function (done) {
         request(app)
-            .get('/api/order/itemlist')
+            .get('/api/order/list')
             .expect(403, done);
     });
 
