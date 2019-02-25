@@ -14,7 +14,10 @@ function isItemInList(Item, List) {
     return index;
 }
 
-// Fetches a list of orders ###################################################
+/**
+ * Fetches a list of orders attached to requested user
+ * @see https://app.swaggerhub.com/apis/CloudyPadmal/Sysco-POS/1.0.0#/order/orderList
+ */
 router.get('/list', VerifyToken, (req, res, next) => {
     // Each order will have userID as it's cart ID
     OrderModel.find({ cartID: req._id }).then(docs => {
@@ -24,7 +27,10 @@ router.get('/list', VerifyToken, (req, res, next) => {
     });
 });
 
-// Creates a new order ########################################################
+/**
+ * Creates a new blank order for the requested user
+ * @see https://app.swaggerhub.com/apis/CloudyPadmal/Sysco-POS/1.0.0#/order/newOrder
+ */
 router.post('/new', VerifyToken, (req, res, next) => {
     let o = new OrderModel({
         cartID: req._id,
