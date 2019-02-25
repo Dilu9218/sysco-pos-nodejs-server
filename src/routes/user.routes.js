@@ -6,7 +6,10 @@ var router = express.Router();
 
 var UserModel = require('../database/models/user.model');
 
-/** Tested */
+/** 
+ * Registers a new user with the system
+ * @see https://app.swaggerhub.com/apis/CloudyPadmal/Sysco-POS/1.0.0#/user/registerUser
+ */
 router.post('/register', function (req, res) {
     if (req.body.username && req.body.password) {
         var pwd_hashed = bcrypt.hashSync(req.body.password, 10);
@@ -41,7 +44,10 @@ router.post('/register', function (req, res) {
     }
 });
 
-/** Tested */
+/** 
+ * Logs user in with correct username and password
+ * @see https://app.swaggerhub.com/apis/CloudyPadmal/Sysco-POS/1.0.0#/user/logUserIn 
+ * */
 router.post('/login', function (req, res) {
     if (req.body.username && req.body.password) {
         UserModel.findOne({ username: req.body.username }, function (err, user) {
