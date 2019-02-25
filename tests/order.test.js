@@ -515,30 +515,121 @@ describe('Adds item to an order', function () {
     });
 });
 
-describe('Deletes an order', function () {
+describe('Checkouts an order', function () {
 
-    it('Deletes the order with no authorization', function (done) {
+    it('Checkout the order with no authorization', function (done) {
+        request(app)
+            .delete(`/api/order/checkout/${lOrderID}`)
+            .expect(403, done);
+    });
+    it('Checkout the order with invalid authorization', function (done) {
+        request(app)
+            .delete(`/api/order/checkout/${lOrderID}`)
+            .set('x-access-token', gToken + 'z')
+            .expect(500, done);
+    });
+    it('Checkout the order with valid authorization', function (done) {
+        request(app)
+            .delete(`/api/order/checkout/${lOrderID}`)
+            .set('x-access-token', gToken)
+            .expect(200, done);
+    });
+    it('Checkout a non existing order with valid authorization', function (done) {
+        request(app)
+            .delete(`/api/order/checkout/${lOrderID}z`)
+            .set('x-access-token', gToken)
+            .expect(404, done);
+    });
+});
+
+describe('Deleting an order', function () {
+    let cartID = undefined;
+
+    beforeAll(async (done) => {
+        let testItem1 = new ItemModel({
+            productID: 'TH-ENE-W01',
+            productTitle: "Item Under Test 01",
+            quantity: 490,
+            description: "This item has 490 at the beginning",
+            price: 250.00
+        });
+        let testItem1C = new ItemModel({
+            productID: 'TH-ENE-W01',
+            productTitle: "Item Under Test 01",
+            quantity: 10,
+            description: "This item was added to order",
+            price: 250.00
+        });
+
+        let testItem2 = new ItemModel({
+            productID: 'TH-ENE-W02',
+            productTitle: "Item Under Test 02",
+            quantity: 1567,
+            description: "This item has 1567 at the beginning",
+            price: 487.33
+        });
+        let testItem2C = new ItemModel({
+            productID: 'TH-ENE-W02',
+            productTitle: "Item Under Test 02",
+            quantity: 433,
+            description: "This item was added to order",
+            price: 487.33
+        });
+
+        let testOrder = new OrderModel({
+            cartID: 'ThisIsTheTestCartID',
+            items: [testItem1C, testItem2C]
+        });
+        await ItemModel.insertMany([testItem1, testItem2]).then(docs => {
+            testOrder.save().then(doc => {
+                cartID = doc._id;
+                done();
+            });
+        });
+    });
+
+    it('Delete the order with no authorization', function (done) {
         request(app)
             .delete(`/api/order/order/${lOrderID}`)
             .expect(403, done);
     });
-    it('Deletes the order with invalid authorization', function (done) {
+    it('Delete the order with invalid authorization', function (done) {
         request(app)
             .delete(`/api/order/order/${lOrderID}`)
             .set('x-access-token', gToken + 'z')
             .expect(500, done);
     });
-    it('Deletes the order with valid authorization', function (done) {
+    it('Delete the order with valid authorization', function (done) {
         request(app)
-            .delete(`/api/order/order/${lOrderID}`)
+            .delete(`/api/order/order/${cartID}`)
             .set('x-access-token', gToken)
-            .expect(200, done);
+            .expect(200).then(res => {
+                ItemModel.findOne({ productID: 'TH-ENE-W01' }).then(doc1 => {
+                    ItemModel.findOne({ productID: 'TH-ENE-W02' }).then(doc2 => {
+                        expect(doc1.quantity).toBe(500);
+                        expect(doc2.description).toBe('This item has 1567 at the beginning');
+                        expect(doc2.quantity).toBe(2000);
+                        done();
+                    });
+                });
+            });
     });
-    it('Deletes a non existing order with valid authorization', function (done) {
+    it('Delete a non existing order with valid authorization', function (done) {
         request(app)
-            .delete(`/api/order/order/${lOrderID}z`)
+            .delete(`/api/order/checkout/${lOrderID}z`)
             .set('x-access-token', gToken)
             .expect(404, done);
+    });
+
+    afterAll(async (done) => {
+        await OrderModel.findOneAndDelete({ cartID: 'ThisIsTheTestCartID' }).then(res => {
+            ItemModel.deleteOne({ productID: 'TH-ENE-W01' }).then(doc => {
+                ItemModel.deleteOne({ productID: 'TH-ENE-W02' }).then(doc => {
+                    console.log('Deleted test items created for deleting an order');
+                    done();
+                });
+            });
+        })
     });
 });
 

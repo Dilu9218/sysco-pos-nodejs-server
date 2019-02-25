@@ -68,7 +68,23 @@ router.post('/add/:id', VerifyToken, (req, res, next) => {
         });
 });
 
-// Gets an order #############################################################
+/**
+ * Checks out an order
+ * @see https://app.swaggerhub.com/apis/CloudyPadmal/Sysco-POS/1.0.0#/order/checkoutOrder
+ */
+router.delete('/checkout/:id', VerifyToken, (req, res, next) => {
+    OrderModel.findOneAndDelete(
+        { _id: req.params.id }).then(doc => {
+            return res.status(200).json(doc);
+        }).catch(er => {
+            return res.status(404).json({ 'status': 'Order not found' });
+        });
+});
+
+/**
+ * Fetches an order by its ID
+ * @see https://app.swaggerhub.com/apis/CloudyPadmal/Sysco-POS/1.0.0#/order/fetchOrder
+ */
 router.get('/order/:id', VerifyToken, (req, res, next) => {
     OrderModel
         .findOne({ _id: req.params.id })
@@ -76,7 +92,34 @@ router.get('/order/:id', VerifyToken, (req, res, next) => {
             res.status(200).json(doc);
         })
         .catch(er => {
-            res.status(404).json({ 'error': 'Cannot find such order list' });
+            res.status(404).json({ 'error': 'Cannot find such order' });
+        });
+});
+
+/**
+ * Deletes an order and increment count in respective items
+ * @see 
+ */
+router.delete('/order/:id', VerifyToken, (req, res, next) => {
+    OrderModel.findOneAndDelete(
+        { _id: req.params.id }).then(doc => {
+            let itemList = doc.items;
+            // There are items in the order, We need to add them back to global items
+            if (itemList.length > 0) {
+                itemList.forEach(item => {
+                    ItemModel.findOneAndUpdate({ productID: item.productID },
+                        { $inc: { quantity: item.quantity } }, { new: true })
+                        .then(item => { })
+                        .catch(err => {
+                            return res.status(500).json(doc);
+                        });
+                    return res.status(200).json(itemList);
+                });
+            } else {
+                return res.status(200).json(doc);
+            }
+        }).catch(er => {
+            return res.status(404);
         });
 });
 
@@ -150,16 +193,6 @@ router.put('/order/:id', VerifyToken, (req, res, next) => {
     }).catch(err => {
         return res.status(404).json({ 'status': 'Order list not found' });
     });
-});
-
-// Deletes an order ###########################################################
-router.delete('/order/:id', VerifyToken, (req, res, next) => {
-    OrderModel.findOneAndDelete(
-        { _id: req.params.id }).then(doc => {
-            return res.status(200).json(doc);
-        }).catch(er => {
-            return res.status(404).json({ 'status': 'Order list not found' });
-        });
 });
 
 module.exports = router
