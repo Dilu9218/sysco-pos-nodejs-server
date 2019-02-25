@@ -123,6 +123,33 @@ router.delete('/order/:id', VerifyToken, (req, res, next) => {
         });
 });
 
+/**
+ * Removes a single item from an order
+ * @see https://app.swaggerhub.com/apis/CloudyPadmal/Sysco-POS/1.0.0#/order/removeItemsInOrder
+ */
+router.put('/order/:id', VerifyToken, (req, res, next) => {
+    ItemModel.findOneAndUpdate({ productID: req.body.productID },
+        { $inc: { quantity: req.body.quantity } }, { new: true }).then(doc => {
+            OrderModel.findOneAndUpdate({ _id: req.params.id },
+                { $pull: { items: { productID: req.body.productID } } }, { new: true }).then(updatedOrder => {
+                    return res.status(200).json(updatedOrder);
+                }).catch(err => {
+                    return res.status(404).json({ 'error': 'Cannot find such item' });
+                })
+        }).catch(err => {
+            return res.status(404).json({ 'error': 'Cannot find such item' });
+        })
+});
+
+/**
+ * Updates item quantities in an order
+ * @see https://app.swaggerhub.com/apis/CloudyPadmal/Sysco-POS/1.0.0#/order/updateItemsInOrder
+ */
+router.patch('/order/:id', VerifyToken, (req, res, next) => {
+    
+});
+
+
 router.post('/order/:id', VerifyToken, (req, res, next) => {
     // Fetch the item from item pool
     ItemModel.findOne({ productID: req.body.productID }).then(item => {

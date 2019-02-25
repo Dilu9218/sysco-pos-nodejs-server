@@ -29,7 +29,10 @@ router.post('/new', VerifyToken, (req, res, next) => {
     });
 });
 
-// Gets an item ###############################################################
+/**
+ * Fetches an item
+ * @see https://app.swaggerhub.com/apis/CloudyPadmal/Sysco-POS/1.0.0#/item/fetchItem
+ */
 router.get('/item/:id', VerifyToken, (req, res, next) => {
     ItemModel
         .findOne({ _id: req.params.id })
@@ -37,17 +40,20 @@ router.get('/item/:id', VerifyToken, (req, res, next) => {
             res.status(200).json(doc);
         })
         .catch(er => {
-            res.status(404).json({ 'error': 'Cannot find such order list' });
+            res.status(404).json({ 'error': 'Cannot find such item' });
         });
 });
 
-// Updates an item ############################################################
+/**
+ * Updates an item
+ * @see https://app.swaggerhub.com/apis/CloudyPadmal/Sysco-POS/1.0.0#/item/updateItem
+ */
 router.put('/item/:id', VerifyToken, (req, res, next) => {
     ItemModel.findOneAndUpdate(
         { _id: req.params.id }, req.body, { new: true }).then(doc => {
             return res.status(200).json(doc);
         }).catch(er => {
-            return res.status(404).json({ 'status': 'Order list not found' });
+            return res.status(404).json({ 'status': 'Item not found' });
         });
 });
 
