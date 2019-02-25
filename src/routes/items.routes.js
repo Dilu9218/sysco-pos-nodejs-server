@@ -3,7 +3,10 @@ var router = express.Router();
 var VerifyToken = require('../auth/verifytoken');
 var ItemModel = require('../database/models/item.model');
 
-// Gets a list of items in the database #######################################
+/**
+ * Fetches all available items in database
+ * @see https://app.swaggerhub.com/apis/CloudyPadmal/Sysco-POS/1.0.0#/item/itemList
+ */
 router.get('/list', VerifyToken, (req, res, next) => {
     ItemModel.find({}).then(docs => {
         return res.status(200).json(docs);
@@ -13,7 +16,10 @@ router.get('/list', VerifyToken, (req, res, next) => {
     });
 });
 
-// Creates a new item #########################################################
+/**
+ * Adds a new item to the item collection
+ * @see https://app.swaggerhub.com/apis/CloudyPadmal/Sysco-POS/1.0.0#/item/addNewItem
+ */
 router.post('/new', VerifyToken, (req, res, next) => {
     let o = new ItemModel(req.body);
     o.save().then(doc => {
