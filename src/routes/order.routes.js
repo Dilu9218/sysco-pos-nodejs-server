@@ -98,7 +98,7 @@ router.get('/order/:id', VerifyToken, (req, res, next) => {
 
 /**
  * Deletes an order and increment count in respective items
- * @see 
+ * @see https://app.swaggerhub.com/apis/CloudyPadmal/Sysco-POS/1.0.0#/order/deleteOrder
  */
 router.delete('/order/:id', VerifyToken, (req, res, next) => {
     OrderModel.findOneAndDelete(
