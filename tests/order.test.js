@@ -447,6 +447,74 @@ describe('User fetches a list of orders', function () {
     });
 });
 
+describe('Adds item to an order', function () {
+
+    beforeAll(async (done) => {
+        let testItem = new ItemModel({
+            productID: 'NE-WPOS-TME',
+            productTitle: "New Adding Method",
+            quantity: 500,
+            description: "This is a test item created to test adding a new item",
+            price: 250.00
+        });
+        // Save the test item
+        await testItem.save().then(doc => {
+            done();
+        });
+    });
+
+    it('Adds a new item to the order without authorization', function (done) {
+        request(app)
+            .post(`/api/order/add/${lOrderID}`)
+            .send({
+                productID: 'NE-WPOS-TME',
+                quantity: 10
+            })
+            .expect(403, done);
+    });
+    it('Adds a new item to the order with invalid authorization', function (done) {
+        request(app)
+            .post(`/api/order/add/${lOrderID}`)
+            .set('x-access-token', gToken + 'z')
+            .send({
+                productID: 'NE-WPOS-TME',
+                quantity: 10
+            })
+            .expect(500, done);
+    });
+    it('Adds a new item to the order', function (done) {
+        request(app)
+            .post(`/api/order/add/${lOrderID}`)
+            .set('x-access-token', gToken)
+            .send({
+                productID: 'NE-WPOS-TME',
+                quantity: 10
+            })
+            .expect(200).then(res => {
+                ItemModel.findOne({ productID: 'NE-WPOS-TME' }).then(doc => {
+                    expect(doc.quantity).toBe(490);
+                    done();
+                });
+            });
+    });
+    it('Adds a non existing item to the order', function (done) {
+        request(app)
+            .post(`/api/order/add/${lOrderID}`)
+            .set('x-access-token', gToken)
+            .send({
+                productID: 'NE-WNOS-TME',
+                quantity: 10
+            })
+            .expect(404, done);
+    });
+
+    afterAll(async (done) => {
+        await ItemModel.findOneAndDelete({ productID: 'NE-WPOS-TME' }).then(res => {
+            done();
+        })
+    });
+});
+
 describe('Deletes an order', function () {
 
     it('Deletes the order with no authorization', function (done) {

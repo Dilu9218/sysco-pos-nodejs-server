@@ -43,6 +43,31 @@ router.post('/new', VerifyToken, (req, res, next) => {
     });
 });
 
+/**
+ * Adds a new item to an order
+ * @see https://app.swaggerhub.com/apis/CloudyPadmal/Sysco-POS/1.0.0#/order/addItemToOrder
+ */
+router.post('/add/:id', VerifyToken, (req, res, next) => {
+    // Fetch the item from item pool and decrement the amount from item quantity
+    ItemModel.findOneAndUpdate({ productID: req.body.productID }, { $inc: { quantity: -req.body.quantity } })
+        .then(item => {
+            // Clone the item so that we can add it to our order as a seperate item
+            let newItem = item;
+            // Set it's quantity as the purchased quantity
+            newItem.quantity = req.body.quantity;
+            // Update our order with the new item
+            OrderModel.findOneAndUpdate({ _id: req.params.id }, { $push: { items: newItem } }, { new: true })
+                .then(newOrder => {
+                    return res.status(200).json(newOrder);
+                }).catch(err => {
+                    return res.status(500).json({ 'status': 'Error adding item to list' });
+                });
+        }).catch(err => {
+            // Don't worry this won't happen as I will handle this validation from front end
+            return res.status(404).json({ 'status': 'Item not found' });
+        });
+});
+
 // Gets an order #############################################################
 router.get('/order/:id', VerifyToken, (req, res, next) => {
     OrderModel
