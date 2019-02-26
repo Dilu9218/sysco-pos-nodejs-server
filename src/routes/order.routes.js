@@ -4,16 +4,6 @@ var VerifyToken = require('../auth/verifytoken');
 var ItemModel = require('../database/models/item.model');
 var OrderModel = require('../database/models/order.model');
 
-function isItemInList(Item, List) {
-    var index = -1;
-    for (var i = 0; i < List.length; i++) {
-        if (List[i].productID === Item) {
-            index = i;
-        }
-    }
-    return index;
-}
-
 /**
  * Fetches a list of orders attached to requested user
  * @see https://app.swaggerhub.com/apis/CloudyPadmal/Sysco-POS/1.0.0#/order/orderList
