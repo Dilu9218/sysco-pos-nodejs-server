@@ -9,6 +9,7 @@ var gid = undefined;
 var gUser = undefined;
 var gAdminToken = undefined;
 var gUserToken = undefined;
+var adminID, tUserID, tNormalID;
 
 function generateUserName() {
     var text = "";
@@ -19,50 +20,36 @@ function generateUserName() {
     return text;
 }
 
-/** Before the test begins, create three users;
- * User - Doesn't have any login credentials, just for testing
- * AdminUser - Has admin privileges
- * NormalUser - Doesn't have such privileges
- * 
- * Apart from these three, another user will be created as a result of a test
- */
 beforeAll(async (done) => {
-    // First clear the whole user database
-    await AdminModel.deleteMany({}, () => {
-        // Create a user ID for testing operations on a typical user
-        gUser = generateUserName();
-        let testUser = new AdminModel({
-            username: gUser,
-            password: bcrypt.hashSync("falsepassword0", 10),
-            isAdmin: false
-        })
-        let adminUser = new AdminModel({
-            username: generateUserName(),
-            password: bcrypt.hashSync("falsepassword1", 10),
-            isAdmin: true
+    // Create test users for the test class
+    gUser = generateUserName();
+    let testUser = new AdminModel({
+        username: gUser, password: bcrypt.hashSync("falsepassword0", 10), isAdmin: false
+    })
+    let adminUser = new AdminModel({
+        username: generateUserName(), password: bcrypt.hashSync("falsepassword1", 10), isAdmin: true
+    });
+    let normalUser = new AdminModel({
+        username: generateUserName(), password: bcrypt.hashSync("falsepassword2", 10), isAdmin: false
+    });
+    let deletableUser = new AdminModel({
+        username: "deletableUser", password: "falsepassword", isAdmin: false
+    });
+    await AdminModel.insertMany([testUser, adminUser, normalUser, deletableUser]).then(savedUsers => {
+        // Sign users and save tokens
+        console.debug(`Admin is ${savedUsers[1].username} with ${savedUsers[1]._id}\nNormal user is ${savedUsers[2].username}\nTest user is ${savedUsers[0].username}`);
+        gAdminToken = jwt.sign({ id: savedUsers[1]._id }, config.secret, {
+            expiresIn: (24 * 60 * 60)
         });
-        let normalUser = new AdminModel({
-            username: generateUserName(),
-            password: bcrypt.hashSync("falsepassword2", 10),
-            isAdmin: false
+        adminID = savedUsers[1]._id;
+        gUserToken = jwt.sign({ id: savedUsers[2]._id }, config.secret, {
+            expiresIn: (24 * 60 * 60)
         });
-        adminUser.save().then(docAdmin => {
-            gAdminToken = jwt.sign({ id: docAdmin._id }, config.secret, {
-                expiresIn: (24 * 60 * 60)
-            });
-            normalUser.save().then(docUser => {
-                gUserToken = jwt.sign({ id: docUser._id }, config.secret, {
-                    expiresIn: (24 * 60 * 60)
-                });
-                testUser.save().then(docTest => {
-                    console.debug(`Admin is ${docAdmin.username}\nNormal user is ${docUser.username}\nTest user is ${docTest.username}`);
-                    // Global user ID needed for testing would be this user's
-                    gid = docTest._id;
-                    console.debug('Done creating all test users. Proceed with testing');
-                    done();
-                });
-            });
-        });
+        tNormalID = savedUsers[2]._id;
+        // Global user ID needed for testing would be this user's
+        gid = savedUsers[0]._id;
+        tUserID = savedUsers[3]._id;
+        done();
     });
 });
 
@@ -155,6 +142,13 @@ describe('Admin adds a new user', function () {
             })
             .expect(409, done);
     });
+
+    afterAll(async (done) => {
+        await AdminModel.findOneAndDelete({ username: user }).then(res => {
+            console.log('Deleted user in testing');
+            done();
+        });
+    });
 });
 
 describe('Admin lists out all the users', function () {
@@ -182,7 +176,6 @@ describe('Admin lists out all the users', function () {
             .set('x-access-token', gAdminToken)
             .expect(200).then(r => {
                 expect(r.body.length).toBeGreaterThanOrEqual(4);
-                expect(r.body[2].username).toBe(gUser);
                 done();
             });
     });
@@ -195,12 +188,14 @@ describe('Admin fetches a user', function () {
             .get(`/api/admin/user/${gid}`)
             .expect(403, done);
     });
-    it('Fetching a user with authorization', async function () {
-        const r = await request(app)
+    it('Fetching a user with authorization', function (done) {
+        request(app)
             .get(`/api/admin/user/${gid}`)
             .set('x-access-token', gAdminToken)
-            .expect(200);
-        expect(r.body[0].username).toBe(gUser);
+            .expect(200).then(res => {
+                expect(res.body[0].username).toBe(gUser);
+                done();
+            });
     });
     it('Fetching a user with invalid role authorization', function (done) {
         request(app)
@@ -268,48 +263,37 @@ describe('Admin updates a user', function () {
 
 describe('Admin deletes a user', function () {
 
-    var id = undefined;
-
-    beforeAll(async (done) => {
-        let deletableUser = new AdminModel({
-            username: "deletableUser",
-            password: "falsepassword",
-            isAdmin: true
-        });
-        await deletableUser.save().then(doc => {
-            id = doc._id;
-            done();
-        });
-    });
-
     it('Deleting a user without authorization', function (done) {
         request(app)
-            .delete(`/api/admin/user/${id}`)
+            .delete(`/api/admin/user/${tUserID}`)
             .expect(403, done);
     });
     it('Deleting a user with invalid role authorization', function (done) {
         request(app)
-            .delete(`/api/admin/user/${id}`)
+            .delete(`/api/admin/user/${tUserID}`)
             .set('x-access-token', gUserToken)
             .expect(403, done);
     });
     it('Deleting a user with authorization', function () {
         return request(app)
-            .delete(`/api/admin/user/${id}`)
+            .delete(`/api/admin/user/${tUserID}`)
             .set('x-access-token', gAdminToken)
             .expect(200).then(r => {
-                expect(String.valueOf(r.body._id)).toBe(String.valueOf(id));
+                expect(String.valueOf(r.body._id)).toBe(String.valueOf(tUserID));
             });
     });
     it('Deleting a user with an invalid ID', function (done) {
         request(app)
-            .delete(`/api/admin/user/${id}z`)
+            .delete(`/api/admin/user/${tUserID}z`)
             .set('x-access-token', gAdminToken)
             .expect(404, done);
     });
 });
 
-afterAll(() => {
-    console.log('Cleared Admin Collection after testing');
-    AdminModel.deleteMany({}, () => { });
+afterAll(async (done) => {
+    let testUsers = [adminID, tNormalID, gid, tUserID];
+    await AdminModel.deleteMany({ _id: { $in: testUsers } }).then(docs => {
+        console.log(`Cleared ${docs.n} test users created for testing`);
+        done();
+    })
 })

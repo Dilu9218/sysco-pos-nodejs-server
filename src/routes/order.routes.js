@@ -119,7 +119,7 @@ router.delete('/order/:id', VerifyToken, (req, res, next) => {
                 return res.status(200).json(doc);
             }
         }).catch(er => {
-            return res.status(404);
+            return res.status(404).end();
         });
 });
 
@@ -138,7 +138,7 @@ router.put('/order/:id', VerifyToken, (req, res, next) => {
                 })
         }).catch(err => {
             return res.status(404).json({ 'error': 'Cannot find such item' });
-        })
+        });
 });
 
 /**
@@ -146,10 +146,20 @@ router.put('/order/:id', VerifyToken, (req, res, next) => {
  * @see https://app.swaggerhub.com/apis/CloudyPadmal/Sysco-POS/1.0.0#/order/updateItemsInOrder
  */
 router.patch('/order/:id', VerifyToken, (req, res, next) => {
-    
+    ItemModel.findOneAndUpdate({ productID: req.body.productID },
+        { $inc: { quantity: -req.body.difference } }, { new: true }).then(doc => {
+            OrderModel.findOneAndUpdate({ _id: req.params.id, "items.productID": req.body.productID },
+                { $set: { "items.$.quantity": req.body.quantity } }, { new: true }).then(updatedOrder => {
+                    return res.status(200).json(updatedOrder);
+                }).catch(err => {
+                    return res.status(405).json({ 'error': 'Cannot find such order' });
+                })
+        }).catch(err => {
+            return res.status(404).json({ 'error': 'Cannot find such item' });
+        });
 });
 
-
+/* 
 router.post('/order/:id', VerifyToken, (req, res, next) => {
     // Fetch the item from item pool
     ItemModel.findOne({ productID: req.body.productID }).then(item => {
@@ -220,6 +230,6 @@ router.put('/order/:id', VerifyToken, (req, res, next) => {
     }).catch(err => {
         return res.status(404).json({ 'status': 'Order list not found' });
     });
-});
+}); */
 
 module.exports = router

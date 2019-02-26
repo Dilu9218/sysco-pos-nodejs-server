@@ -18,26 +18,10 @@ router.post('/register', function (req, res) {
             password: pwd_hashed,
             isAdmin: false
         });
-        u.save().then(doc => {
-            UserModel.find({ username: req.body.username }).then(docs => {
-                if (docs.length === 1) {
-                    var token = jwt.sign({ id: doc._id }, config.secret, {
-                        expiresIn: (24 * 60 * 60)
-                    });
-                    return res.status(200).send({ 'status': 'User created successfully', 'token': token });
-                } else {
-                    return res.status(409).json({ 'error': 'Duplicate user name' });
-                }
-            }).catch(e => {
-                return res.status(409).json({ 'error': 'Duplicate user name' });
-            });
+        u.save().then(savedUser => {
+            return res.status(200).send({ 'status': 'User created successfully' });
         }).catch(err => {
-            if (err.name === 'MongoError' && err.code === 11000) {
-                return res.status(409).json({ 'error': 'Duplicate user name' });
-            }
-            if (err.name === 'ValidationError') {
-                return res.status(400).json({ 'error': 'Some fields are missing' });
-            }
+            return res.status(409).json({ 'error': 'Duplicate user name' });
         });
     } else {
         return res.status(406).json({ 'error': 'User data missing' });
@@ -63,7 +47,7 @@ router.post('/login', function (req, res) {
             var token = jwt.sign({ id: user._id }, config.secret, {
                 expiresIn: (24 * 60 * 60)
             });
-            res.status(200).json({ 'status': 'Logged in successfully', token: token });
+            return res.status(200).json({ 'status': 'Logged in successfully', token: token });
         });
     } else {
         res.status(406).json({ 'error': 'User data missing' });

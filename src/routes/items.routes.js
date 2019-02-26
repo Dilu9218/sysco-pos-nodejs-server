@@ -11,7 +11,6 @@ router.get('/list', VerifyToken, (req, res, next) => {
     ItemModel.find({}).then(docs => {
         return res.status(200).json(docs);
     }).catch(err => {
-        console.error(err);
         return res.status(404).json({ 'status': 'No items found' });
     });
 });

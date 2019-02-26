@@ -14,13 +14,8 @@ function generateUserName() {
     return text;
 }
 
-beforeAll(async (done) => {
-    // First clear the whole user database
-    await UserModel.deleteMany({}, (err) => {
-        gUser = generateUserName();
-        console.debug(`Cleared user collection. UUT is ${gUser}. Proceed with testing`);
-        done();
-    });
+beforeAll(() => {
+    gUser = generateUserName();
 });
 
 describe('Creating a new User', function () {
@@ -119,9 +114,8 @@ describe('User tries to log in', function () {
 });
 
 afterAll(async (done) => {
-    // Drop all users
-    await UserModel.deleteMany({}, () => {
-        console.log('Cleared User Collection after testing')
+    await UserModel.findOneAndDelete({ username: gUser }).then(res => {
+        console.log('Cleaned up resources created while testing user end points');
         done();
     });
 });
