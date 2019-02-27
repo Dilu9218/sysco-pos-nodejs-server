@@ -135,7 +135,7 @@ router.put('/order/:id', VerifyToken, (req, res, next) => {
  * Updates item quantities in an order
  * @see https://app.swaggerhub.com/apis/CloudyPadmal/Sysco-POS/1.0.0#/order/updateItemsInOrder
  */
-router.patch('/order/:id', VerifyToken, (req, res, next) => {
+router.post('/order/:id', VerifyToken, (req, res, next) => {
     ItemModel.findOneAndUpdate({ productID: req.body.productID },
         { $inc: { quantity: -req.body.difference } }, { new: true }).then(doc => {
             OrderModel.findOneAndUpdate({ _id: req.params.id, "items.productID": req.body.productID },

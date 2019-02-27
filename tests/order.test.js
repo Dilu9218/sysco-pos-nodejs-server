@@ -721,18 +721,18 @@ describe('Changing an item in an order', function () {
 
     it('Change an item from an order with no authorization', function (done) {
         request(app)
-            .patch(`/api/order/order/${orderID}`)
+            .post(`/api/order/order/${orderID}`)
             .expect(403, done);
     });
     it('Change an item from an order with invalid authorization', function (done) {
         request(app)
-            .patch(`/api/order/order/${orderID}`)
+            .post(`/api/order/order/${orderID}`)
             .set('x-access-token', gToken + 'z')
             .expect(500, done);
     });
     it('Change an item from an order with valid authorization', function (done) {
         request(app)
-            .patch(`/api/order/order/${orderID}`)
+            .post(`/api/order/order/${orderID}`)
             .set('x-access-token', gToken)
             .send({
                 productID: 'OR-DER-111',
@@ -752,7 +752,7 @@ describe('Changing an item in an order', function () {
     });
     it('Change an item from a non existing order with valid authorization', function (done) {
         request(app)
-            .patch(`/api/order/order/${orderID}z`)
+            .post(`/api/order/order/${orderID}z`)
             .set('x-access-token', gToken)
             .send({
                 productID: 'OR-DER-111',
