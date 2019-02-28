@@ -14,8 +14,7 @@ router.post('/user/add', VerifyToken, (req, res, next) => {
     }).catch(err => {
         if (err.name === 'MongoError' && err.code === 11000) {
             return res.status(409).json({ 'error': 'Duplicate user name' });
-        }
-        if (err.name === 'ValidationError') {
+        } else {
             return res.status(400).json({ 'error': 'Some fields are missing' });
         }
     });
@@ -30,9 +29,6 @@ router.get('/users', VerifyToken, (req, res, next) => {
         .find({})
         .then(doc => {
             return res.status(200).json(doc);
-        })
-        .catch(err => {
-            return res.status(404).json({ 'error': 'Cannot fetch any users' });
         });
 });
 
