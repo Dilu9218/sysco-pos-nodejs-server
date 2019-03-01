@@ -145,7 +145,7 @@ router.post('/order/:id', VerifyToken, (req, res, next) => {
                     return res.status(405).json({ 'error': 'Cannot find such order' });
                 })
         }).catch(err => {
-            return res.status(404).json({ 'error': 'Cannot find such item' });
+            return res.status(404).json({ 'error': 'Cannot facilitate the request' });
         });
 });
 

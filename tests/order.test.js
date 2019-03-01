@@ -420,25 +420,25 @@ describe('Adds item to an order', function () {
             })
             .expect(404, done);
     });
-    it('Adds an item with invalid data', function(done) {
+    it('Adds an item with invalid data', function (done) {
         request(app)
-        .post(`/api/order/add/${lOrderID}`)
-        .set('x-access-token', gToken)
-        .send({
-            productID: 'NE-WPOS-TME',
-            quantity: 'abc'
-        })
-        .expect(404, done);
+            .post(`/api/order/add/${lOrderID}`)
+            .set('x-access-token', gToken)
+            .send({
+                productID: 'NE-WPOS-TME',
+                quantity: 'abc'
+            })
+            .expect(404, done);
     });
-    it('Adds an item with invalid order', function(done) {
+    it('Adds an item with invalid order', function (done) {
         request(app)
-        .post(`/api/order/add/${lOrderID}z`)
-        .set('x-access-token', gToken)
-        .send({
-            productID: 'NE-WPOS-TME',
-            quantity: 10
-        })
-        .expect(500, done);
+            .post(`/api/order/add/${lOrderID}z`)
+            .set('x-access-token', gToken)
+            .send({
+                productID: 'NE-WPOS-TME',
+                quantity: 10
+            })
+            .expect(500, done);
     });
 
     afterAll(async (done) => {
@@ -749,6 +749,17 @@ describe('Changing an item in an order', function () {
                     });
                 });
             });
+    });
+    it('Change an item from an order with invalid quantity with valid authorization', function (done) {
+        request(app)
+            .post(`/api/order/order/${orderID}`)
+            .set('x-access-token', gToken)
+            .send({
+                productID: 'OR-DER-111',
+                quantity: 'A',
+                difference: 'A'
+            })
+            .expect(404, done);
     });
     it('Change an item from a non existing order with valid authorization', function (done) {
         request(app)
