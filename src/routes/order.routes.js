@@ -56,6 +56,10 @@ router.post('/add/:id', VerifyToken, (req, res, next) => {
         });
 });
 
+/**
+ * Adds a set of items to an order
+ * @see ...
+ */
 router.put('/add/:id', VerifyToken, (req, res, next) => {
     // Need to add every item requested to add to this order
     if (req.body.items === undefined || Object.keys(req.body.items).length === 0) {
