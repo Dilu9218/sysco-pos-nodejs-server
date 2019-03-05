@@ -28,8 +28,6 @@ router.post('/new', VerifyToken, (req, res, next) => {
     });
     o.save().then(doc => {
         res.status(200).json(doc);
-    }).catch(er => {
-        res.status(400).send(er);
     });
 });
 
@@ -56,6 +54,49 @@ router.post('/add/:id', VerifyToken, (req, res, next) => {
             // Don't worry this won't happen as I will handle this validation from front end
             return res.status(404).json({ 'status': 'Item not found' });
         });
+});
+
+router.put('/add/:id', VerifyToken, (req, res, next) => {
+    // Need to add every item requested to add to this order
+    if (req.body.items === undefined || Object.keys(req.body.items).length === 0) {
+        return res.status(400).json({ 'status': 'No items to add to this order' });
+    } else {
+        let itemPromises = [];
+        Object.keys(req.body.items).forEach(productID => {
+            itemPromises.push(new Promise((resolve, reject) => {
+                ItemModel.findOneAndUpdate(
+                    { productID },
+                    { $inc: { quantity: -req.body.items[productID] } })
+                    .then(item => {
+                        // Clone the item so that we can add it to our order as a seperate item
+                        let newItem = item;
+                        // Set it's quantity as the purchased quantity
+                        newItem.quantity = req.body.items[productID];
+                        // Update our order with the new item
+                        OrderModel.findOneAndUpdate(
+                            { _id: req.params.id },
+                            { $push: { items: newItem } }, { new: true })
+                            .then(newOrder => { resolve(newOrder); }).catch(e => {
+                                reject({ 'error': 404 });
+                            });
+                    }).catch(e => {
+                        reject({ 'error': 404 });
+                    });
+            }));
+        });
+        let errCount = 0;
+        let error = undefined;
+        Promise.all(
+            itemPromises.map(p => p.catch(e => { errCount++; error = e; }))
+        ).then(r => {
+            if (errCount > 0) {
+                res.status(error['error']).end();
+            }
+            else {
+                res.status(200).json(r[r.length - 1]);
+            }
+        });
+    }
 });
 
 /**
@@ -99,10 +140,7 @@ router.delete('/order/:id', VerifyToken, (req, res, next) => {
                 itemList.forEach(item => {
                     ItemModel.findOneAndUpdate({ productID: item.productID },
                         { $inc: { quantity: item.quantity } }, { new: true })
-                        .then(item => { })
-                        .catch(err => {
-                            return res.status(500).json(doc);
-                        });
+                        .then(item => { });
                     return res.status(200).json(itemList);
                 });
             } else {
@@ -123,9 +161,7 @@ router.put('/order/:id', VerifyToken, (req, res, next) => {
             OrderModel.findOneAndUpdate({ _id: req.params.id },
                 { $pull: { items: { productID: req.body.productID } } }, { new: true }).then(updatedOrder => {
                     return res.status(200).json(updatedOrder);
-                }).catch(err => {
-                    return res.status(404).json({ 'error': 'Cannot find such item' });
-                })
+                });
         }).catch(err => {
             return res.status(404).json({ 'error': 'Cannot find such item' });
         });

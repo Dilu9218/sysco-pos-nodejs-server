@@ -360,6 +360,72 @@ describe('User fetches a list of items', function () {
     });
 });
 
+describe('Fetches orders related to a user', function () {
+
+    let lOrderID = undefined;
+
+    beforeAll(async (done) => {
+        let testItem1 = new ItemModel({
+            productID: 'CC-FIR-STA',
+            productTitle: "Test Item Three",
+            quantity: 50,
+            description: "This is the third test item created",
+            price: 89.00
+        });
+        let testItem2 = new ItemModel({
+            productID: 'DD-SEC-ONA',
+            productTitle: "Test Item Four",
+            quantity: 34,
+            description: "This is the fourth test item created",
+            price: 175.50
+        });
+        var itemz = [testItem1, testItem2];
+        let testOrder = new OrderModel({
+            cartID: gUserID,
+            items: itemz
+        });
+        await ItemModel.insertMany(itemz).then(docs => {
+            testOrder.save().then(doc => {
+                lOrderID = doc._id;
+                done();
+            });
+        });
+    });
+
+    it('Fetches a set of orders related to user with valid authorization', function (done) {
+        request(app)
+            .get('/api/order/list')
+            .set('x-access-token', gToken)
+            .expect(200).then(res => {
+                console.log(res.body);
+                expect(res.body.length).toBeGreaterThanOrEqual(2);
+                done();
+            });
+    });
+    it('Fetches a set of orders with invalid authorization', function (done) {
+        request(app)
+            .get('/api/order/list')
+            .set('x-access-token', gToken + 'z')
+            .expect(500, done);
+    });
+    it('Fetches a set of orders with no authorization', function (done) {
+        request(app)
+            .get('/api/order/list')
+            .expect(403, done);
+    });
+
+    afterAll(async (done) => {
+        await ItemModel.findOneAndDelete({ productID: 'CC-FIR-STA' }).then(res => {
+            ItemModel.findOneAndDelete({ productID: 'DD-SEC-ONA' }).then(res => {
+                OrderModel.findByIdAndDelete(lOrderID).then(res => {
+                    console.log('Deleted test items and orders fetching orders');
+                    done();
+                });
+            });
+        });
+    });
+});
+
 describe('Adds item to an order', function () {
 
     beforeAll(async (done) => {
@@ -781,6 +847,135 @@ describe('Changing an item in an order', function () {
                     done();
                 });
             });
+        })
+    });
+});
+
+describe('Adds multiple items to an order', function () {
+
+    let localOrderID = undefined;
+
+    beforeAll(async (done) => {
+        let testItem1 = new ItemModel({
+            productID: 'MU-LTI-PL1',
+            productTitle: "Multiple Item One",
+            quantity: 500,
+            description: "This is the first test item created to test multiple item addition",
+            price: 250.00
+        });
+        let testItem2 = new ItemModel({
+            productID: 'MU-LTI-PL2',
+            productTitle: "Multiple Item Two",
+            quantity: 400,
+            description: "This is the second test item created to test multiple item addition",
+            price: 350.00
+        });
+        let testItem3 = new ItemModel({
+            productID: 'MU-LTI-PL3',
+            productTitle: "Multiple Item Three",
+            quantity: 700,
+            description: "This is the third test item created to test multiple item addition",
+            price: 150.00
+        });
+        let testOrder = new OrderModel({
+            cartID: 'CartForMultipleItems',
+            items: []
+        })
+        // Save the test item
+        await ItemModel.insertMany([testItem1, testItem2, testItem3]).then(docs => {
+            testOrder.save().then(doc => {
+                console.debug('Created test items to test multiple item additions');
+                localOrderID = doc._id;
+                done();
+            });
+        })
+    });
+
+    it('Adds multiple items with proper authorization', function (done) {
+        request(app)
+            .put(`/api/order/add/${localOrderID}`)
+            .set('x-access-token', gToken)
+            .send({
+                items: {
+                    'MU-LTI-PL1': 20,
+                    'MU-LTI-PL2': 15,
+                    'MU-LTI-PL3': 230
+                }
+            })
+            .expect(200).then(res => {
+                ItemModel.findOne({ productID: 'MU-LTI-PL1' }).then(i1 => {
+                    ItemModel.findOne({ productID: 'MU-LTI-PL2' }).then(i2 => {
+                        ItemModel.findOne({ productID: 'MU-LTI-PL3' }).then(i3 => {
+                            expect(i1.quantity).toBe(480);
+                            expect(i2.quantity).toBe(385);
+                            expect(i3.quantity).toBe(470);
+                            done();
+                        });
+                    });
+                });
+            });
+    });
+    it('Adds multiple items without proper authorization', function (done) {
+        request(app)
+            .put(`/api/order/add/${localOrderID}`)
+            .set('x-access-token', gToken + 'z')
+            .send({
+                items: {
+                    'MU-LTI-PL1': 20,
+                    'MU-LTI-PL2': 15,
+                    'MU-LTI-PL3': 230
+                }
+            })
+            .expect(500, done);
+    });
+    it('Adds multiple items to an invalid order', function (done) {
+        request(app)
+            .put(`/api/order/add/${localOrderID}z`)
+            .set('x-access-token', gToken)
+            .send({
+                items: {
+                    'MU-LTI-PL1': 20,
+                    'MU-LTI-PL2': 15,
+                    'MU-LTI-PL3': 230
+                }
+            })
+            .expect(404, done);
+    });
+    it('Adds an invalid item to an order', function (done) {
+        request(app)
+            .put(`/api/order/add/${localOrderID}`)
+            .set('x-access-token', gToken)
+            .send({
+                items: {
+                    'MU-LTI-PL0': 20,
+                    'MU-LTI-PL2': 15,
+                    'MU-LTI-PL3': 230
+                }
+            })
+            .expect(404).then(res => {
+                ItemModel.findOne({ productID: 'MU-LTI-PL2' }).then(i2 => {
+                    expect(i2.quantity).toBe(355);
+                    done();
+                });
+            });
+    });
+    it('Adds no items to an order', function (done) {
+        request(app)
+            .put(`/api/order/add/${localOrderID}`)
+            .set('x-access-token', gToken)
+            .expect(400, done);
+    });
+
+    afterAll(async (done) => {
+        await ItemModel.findOneAndDelete({ productID: 'MU-LTI-PL1' }).then(res => {
+            ItemModel.findOneAndDelete({ productID: 'MU-LTI-PL2' }).then(res => {
+                ItemModel.findOneAndDelete({ productID: 'MU-LTI-PL3' }).then(res => {
+                    OrderModel.findOneAndDelete({ cartID: 'CartForMultipleItems' }).then(res => {
+                        console.log('Cleaned up resources used while testing multiple item addition');
+                        done();
+                    })
+                })
+            })
         })
     });
 });
