@@ -11,6 +11,7 @@ var OrderModel = require('../database/models/order.model');
 router.get('/list', VerifyToken, (req, res, next) => {
     // Each order will have userID as it's cart ID
     OrderModel.find({ cartID: req._id }).then(docs => {
+        if (docs.length === 0) throw new Error('No orders found for this user');
         return res.status(200).json(docs);
     }).catch(err => {
         return res.status(404).json({ error: 'No orders found for this user' });

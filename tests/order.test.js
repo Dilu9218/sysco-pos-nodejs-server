@@ -7,6 +7,7 @@ const OrderModel = require('../src/database/models/order.model');
 const UserModel = require('../src/database/models/user.model');
 
 var gToken = undefined;
+var nToken = undefined;
 var gUser = undefined;
 var gUserID = undefined;
 var gItemID = undefined;
@@ -51,6 +52,11 @@ beforeAll(async (done) => {
         password: 'falsepassword',
         isAdmin: false
     });
+    let noorderingUser = new UserModel({
+        username: generateUserName(),
+        password: 'falsepassword',
+        isAdmin: false
+    });
     let testingItem = new ItemModel({
         "productID": "TH-ISI-STS",
         "productTitle": "Test Item",
@@ -58,9 +64,12 @@ beforeAll(async (done) => {
         "description": "This is a test item generated for testing",
         "price": 1000.00
     });
-    await orderingUser.save().then(doc => {
-        gUserID = doc._id;
-        gToken = jwt.sign({ id: doc._id }, config.secret, {
+    await UserModel.insertMany([orderingUser, noorderingUser]).then(users => {
+        gUserID = users[0]._id;
+        gToken = jwt.sign({ id: users[0]._id }, config.secret, {
+            expiresIn: (24 * 60 * 60)
+        });
+        nToken = jwt.sign({ id: users[1]._id }, config.secret, {
             expiresIn: (24 * 60 * 60)
         });
         testingItem.save().then(itm => {
@@ -412,6 +421,12 @@ describe('Fetches orders related to a user', function () {
         request(app)
             .get('/api/order/list')
             .expect(403, done);
+    });
+    it('Fetches a set of orders with a user with no orders', function (done) {
+        request(app)
+            .get('/api/order/list')
+            .set('x-access-token', nToken)
+            .expect(404, done);
     });
 
     afterAll(async (done) => {

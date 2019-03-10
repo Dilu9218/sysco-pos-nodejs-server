@@ -5,7 +5,7 @@ var user = require('../database/models/user.model');
 function ValidateToken(req, res, next) {
     var token = req.headers['x-access-token'];
     if (!token) {
-        return res.status(403).send({ error: 'token not provided' });
+        return res.status(403).send({ error: 'Token not provided' });
     } else {
         jwt.verify(token, config.secret, function (err, decoded) {
             if (err) {

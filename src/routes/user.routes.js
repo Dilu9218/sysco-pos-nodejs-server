@@ -8,7 +8,7 @@ var UserModel = require('../database/models/user.model');
 
 /** 
  * Registers a new user with the system
- * @see https://app.swaggerhub.com/apis/CloudyPadmal/Sysco-POS/1.0.0#/user/registerUser
+ * @see https://app.swaggerhub.com/apis/CloudyPadmal/Sysco-POS/1.0.1#/user/user_register
  */
 router.post('/register', function (req, res) {
     if (req.body.username && req.body.password) {
@@ -30,7 +30,7 @@ router.post('/register', function (req, res) {
 
 /** 
  * Logs user in with correct username and password
- * @see https://app.swaggerhub.com/apis/CloudyPadmal/Sysco-POS/1.0.0#/user/logUserIn 
+ * @see https://app.swaggerhub.com/apis/CloudyPadmal/Sysco-POS/1.0.1#/user/user_login
  * */
 router.post('/login', function (req, res) {
     if (req.body.username && req.body.password) {
