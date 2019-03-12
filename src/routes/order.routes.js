@@ -145,7 +145,7 @@ router.delete('/order/:id', VerifyToken, (req, res, next) => {
 
 /***************************************************************************************************
  * Updates item quantity in an order
- * @see 
+ * @see https://app.swaggerhub.com/apis/CloudyPadmal/Sysco-POS/1.0.1#/order/update_item_quantity
  **************************************************************************************************/
 router.patch('/order/:id', VerifyToken, (req, res, next) => {
     ItemModel.findOneAndUpdate({ productID: req.body.productID },
@@ -161,22 +161,18 @@ router.patch('/order/:id', VerifyToken, (req, res, next) => {
         });
 });
 
-/**
+/***************************************************************************************************
  * Checks out an order
- * @see 
+ * @see https://app.swaggerhub.com/apis/CloudyPadmal/Sysco-POS/1.0.1#/order/check_out_order
  **************************************************************************************************/
-router.delete('/checkout/:id', VerifyToken, (req, res, next) => {
+router.post('/checkout/:id', VerifyToken, (req, res, next) => {
     OrderModel.findOneAndDelete(
         { _id: req.params.id }).then(doc => {
             return res.status(200).json(doc);
         }).catch(er => {
-            return res.status(404).json({ 'status': 'Order not found' });
+            return res.status(404).json({ 'status': 'Cannot find such order' });
         });
 });
-
-
-
-
 
 /**
  * Removes a single item from an order

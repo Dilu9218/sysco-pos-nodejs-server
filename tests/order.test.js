@@ -533,24 +533,24 @@ describe('Checkouts an order', function () {
 
     it('Checkout the order with no authorization', function (done) {
         request(app)
-            .delete(`/api/order/checkout/${lOrderID}`)
+            .post(`/api/order/checkout/${lOrderID}`)
             .expect(403, done);
     });
     it('Checkout the order with invalid authorization', function (done) {
         request(app)
-            .delete(`/api/order/checkout/${lOrderID}`)
+            .post(`/api/order/checkout/${lOrderID}`)
             .set('x-access-token', gToken + 'z')
             .expect(500, done);
     });
     it('Checkout the order with valid authorization', function (done) {
         request(app)
-            .delete(`/api/order/checkout/${lOrderID}`)
+            .post(`/api/order/checkout/${lOrderID}`)
             .set('x-access-token', gToken)
             .expect(200, done);
     });
     it('Checkout a non existing order with valid authorization', function (done) {
         request(app)
-            .delete(`/api/order/checkout/${lOrderID}z`)
+            .post(`/api/order/checkout/${lOrderID}z`)
             .set('x-access-token', gToken)
             .expect(404, done);
     });
