@@ -707,18 +707,18 @@ describe('Removing an item from an order', function () {
 
     it('Remove an item from an order with no authorization', function (done) {
         request(app)
-            .put(`/api/order/order/${orderID}`)
+            .delete(`/api/order/item/${orderID}`)
             .expect(403, done);
     });
     it('Remove an item from an order with invalid authorization', function (done) {
         request(app)
-            .put(`/api/order/order/${orderID}`)
+            .delete(`/api/order/item/${orderID}`)
             .set('x-access-token', gToken + 'z')
             .expect(500, done);
     });
     it('Remove an item from an order with valid authorization', function (done) {
         request(app)
-            .put(`/api/order/order/${orderID}`)
+            .delete(`/api/order/item/${orderID}`)
             .set('x-access-token', gToken)
             .send({
                 productID: 'OR-DER-IT1',
@@ -737,7 +737,7 @@ describe('Removing an item from an order', function () {
     });
     it('Remove an item from a non existing order with valid authorization', function (done) {
         request(app)
-            .put(`/api/order/order/${orderID}z`)
+            .delete(`/api/order/item/${orderID}z`)
             .set('x-access-token', gToken)
             .expect(404, done);
     });

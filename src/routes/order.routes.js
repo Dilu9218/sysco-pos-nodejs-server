@@ -105,6 +105,23 @@ router.put('/items/:id', VerifyToken, (req, res, next) => {
 });
 
 /***************************************************************************************************
+ * Removes a single item from an order was : put -> order
+ * @see https://app.swaggerhub.com/apis/CloudyPadmal/Sysco-POS/1.0.1#/order/delete_item
+ **************************************************************************************************/
+router.delete('/item/:id', VerifyToken, (req, res, next) => {
+    ItemModel.findOneAndUpdate({ productID: req.body.productID },
+        { $inc: { quantity: req.body.quantity } }, { new: true }).then(doc => {
+            OrderModel.findOneAndUpdate({ _id: req.params.id },
+                { $pull: { items: { productID: req.body.productID } } }, { new: true })
+                .then(updatedOrder => {
+                    return res.status(200).json(updatedOrder);
+                });
+        }).catch(err => {
+            return res.status(404).json({ 'error': 'Item not found' });
+        });
+});
+
+/***************************************************************************************************
  * Fetches an order by its ID
  * @see https://app.swaggerhub.com/apis/CloudyPadmal/Sysco-POS/1.0.1#/order/get_this_order
  **************************************************************************************************/
@@ -150,8 +167,11 @@ router.delete('/order/:id', VerifyToken, (req, res, next) => {
 router.patch('/order/:id', VerifyToken, (req, res, next) => {
     ItemModel.findOneAndUpdate({ productID: req.body.productID },
         { $inc: { quantity: -req.body.difference } }, { new: true }).then(doc => {
-            OrderModel.findOneAndUpdate({ _id: req.params.id, "items.productID": req.body.productID },
-                { $set: { "items.$.quantity": req.body.quantity } }, { new: true }).then(updatedOrder => {
+            OrderModel.findOneAndUpdate({
+                _id: req.params.id, "items.productID": req.body.productID
+            },
+                { $set: { "items.$.quantity": req.body.quantity } }, { new: true })
+                .then(updatedOrder => {
                     return res.status(200).json(updatedOrder);
                 }).catch(err => {
                     return res.status(405).json({ 'error': 'Cannot find such order' });
@@ -173,23 +193,5 @@ router.post('/checkout/:id', VerifyToken, (req, res, next) => {
             return res.status(404).json({ 'status': 'Cannot find such order' });
         });
 });
-
-/**
- * Removes a single item from an order
- * @see 
- */
-router.put('/order/:id', VerifyToken, (req, res, next) => {
-    ItemModel.findOneAndUpdate({ productID: req.body.productID },
-        { $inc: { quantity: req.body.quantity } }, { new: true }).then(doc => {
-            OrderModel.findOneAndUpdate({ _id: req.params.id },
-                { $pull: { items: { productID: req.body.productID } } }, { new: true }).then(updatedOrder => {
-                    return res.status(200).json(updatedOrder);
-                });
-        }).catch(err => {
-            return res.status(404).json({ 'error': 'Cannot find such item' });
-        });
-});
-
-
 
 module.exports = router
