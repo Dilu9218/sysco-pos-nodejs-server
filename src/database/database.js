@@ -10,7 +10,8 @@ class Database {
     connectToMongo() {
         console.log(process.env.DATABASE_URL);
         mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true })
-            .then(res => { });
+            .then(res => { })
+            .catch(err => console.log(err));
     }
 }
 
