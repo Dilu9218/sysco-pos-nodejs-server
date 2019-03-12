@@ -335,7 +335,7 @@ paths:
           $ref: '#/definitions/UpdatingItem'
       responses:
         200:
-          description: item added. new order will be returned with items
+          description: item added and new order will be returned with items
           schema:
             $ref: '#/definitions/Order'
         404:
@@ -352,7 +352,46 @@ paths:
             $ref: '#/definitions/InvalidToken'
       security:
       - api_key: []
-    
+  /order/items/{order}:
+    put:
+      tags:
+      - order
+      summary: adds a set of items to order
+      description: Inserts multiple items into items list in this order
+      operationId: order_add_items
+      produces:
+      - application/json
+      parameters:
+      - name: order
+        in: path
+        description: ID of the order the items need to be put into 
+        required: true
+        type: string
+      - name: body
+        in: body
+        schema:
+          $ref: '#/definitions/UpdatingItems'
+      responses:
+        200:
+          description: items added and new order will be returned with new items
+          schema:
+            $ref: '#/definitions/Order'
+        404:
+          description: item or order not found to be added
+          schema:
+            $ref: '#/definitions/ItemNotFoundError'
+        403:
+          description: access token not provided
+          schema:
+            $ref: '#/definitions/AccessTokenMissing'
+        500:
+          description: invalid token provided
+          schema:
+            $ref: '#/definitions/InvalidToken'
+      security:
+      - api_key: []
+      
+      
   /order/{order}:
     get:
       tags:
@@ -665,3 +704,19 @@ definitions:
         type: string
         description: unique ID of a product
         example: "9X-X5T-ZTK"
+  ItemInUpdateItems:
+    type: object
+    properties:
+      productID1:
+        type: string
+        description: ID of item and quantity as property
+        example: 8
+      productID2:
+        type: string
+        description: ID of item and quantity as property
+        example: 5
+  UpdatingItems:
+    type: object
+    properties:
+      items:
+        $ref: '#/definitions/ItemInUpdateItems'
