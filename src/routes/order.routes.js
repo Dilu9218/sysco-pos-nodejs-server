@@ -4,10 +4,10 @@ var VerifyToken = require('../auth/verifytoken');
 var ItemModel = require('../database/models/item.model');
 var OrderModel = require('../database/models/order.model');
 
-/**
+/***************************************************************************************************
  * Fetches a list of orders attached to requested user
- * @see https://app.swaggerhub.com/apis/CloudyPadmal/Sysco-POS/1.0.0#/order/orderList
- */
+ * @see https://app.swaggerhub.com/apis/CloudyPadmal/Sysco-POS/1.0.1#/order/order_list
+ **************************************************************************************************/
 router.get('/list', VerifyToken, (req, res, next) => {
     // Each order will have userID as it's cart ID
     OrderModel.find({ cartID: req._id }).then(docs => {
@@ -18,11 +18,11 @@ router.get('/list', VerifyToken, (req, res, next) => {
     });
 });
 
-/**
+/***************************************************************************************************
  * Creates a new blank order for the requested user
- * @see https://app.swaggerhub.com/apis/CloudyPadmal/Sysco-POS/1.0.0#/order/newOrder
- */
-router.post('/new', VerifyToken, (req, res, next) => {
+ * @see https://app.swaggerhub.com/apis/CloudyPadmal/Sysco-POS/1.0.1#/order/new_order
+ **************************************************************************************************/
+router.post('/order', VerifyToken, (req, res, next) => {
     let o = new OrderModel({
         cartID: req._id,
         items: []
@@ -32,11 +32,11 @@ router.post('/new', VerifyToken, (req, res, next) => {
     });
 });
 
-/**
- * Adds a new item to an order
- * @see https://app.swaggerhub.com/apis/CloudyPadmal/Sysco-POS/1.0.0#/order/addItemToOrder
- */
-router.post('/add/:id', VerifyToken, (req, res, next) => {
+/***************************************************************************************************
+ * Adds a new item to an order ..was post -> /add/:id
+ * @see https://app.swaggerhub.com/apis/CloudyPadmal/Sysco-POS/1.0.1#/order/order_add_item
+ **************************************************************************************************/
+router.put('/item/:id', VerifyToken, (req, res, next) => {
     // Fetch the item from item pool and decrement the amount from item quantity
     ItemModel.findOneAndUpdate({ productID: req.body.productID }, { $inc: { quantity: -req.body.quantity } })
         .then(item => {
@@ -49,17 +49,17 @@ router.post('/add/:id', VerifyToken, (req, res, next) => {
                 .then(newOrder => {
                     return res.status(200).json(newOrder);
                 }).catch(err => {
-                    return res.status(500).json({ 'status': 'Error adding item to list' });
+                    return res.status(500).json({ 'error': 'Error adding item to list' });
                 });
         }).catch(err => {
             // Don't worry this won't happen as I will handle this validation from front end
-            return res.status(404).json({ 'status': 'Item not found' });
+            return res.status(404).json({ 'error': 'Item not found' });
         });
 });
 
 /**
  * Adds a set of items to an order
- * @see ...
+ * @see 
  */
 router.put('/add/:id', VerifyToken, (req, res, next) => {
     // Need to add every item requested to add to this order
@@ -106,7 +106,7 @@ router.put('/add/:id', VerifyToken, (req, res, next) => {
 
 /**
  * Checks out an order
- * @see https://app.swaggerhub.com/apis/CloudyPadmal/Sysco-POS/1.0.0#/order/checkoutOrder
+ * @see 
  */
 router.delete('/checkout/:id', VerifyToken, (req, res, next) => {
     OrderModel.findOneAndDelete(
@@ -119,7 +119,7 @@ router.delete('/checkout/:id', VerifyToken, (req, res, next) => {
 
 /**
  * Fetches an order by its ID
- * @see https://app.swaggerhub.com/apis/CloudyPadmal/Sysco-POS/1.0.0#/order/fetchOrder
+ * @see 
  */
 router.get('/order/:id', VerifyToken, (req, res, next) => {
     OrderModel
@@ -134,7 +134,7 @@ router.get('/order/:id', VerifyToken, (req, res, next) => {
 
 /**
  * Deletes an order and increment count in respective items
- * @see https://app.swaggerhub.com/apis/CloudyPadmal/Sysco-POS/1.0.0#/order/deleteOrder
+ * @see 
  */
 router.delete('/order/:id', VerifyToken, (req, res, next) => {
     OrderModel.findOneAndDelete(
@@ -158,7 +158,7 @@ router.delete('/order/:id', VerifyToken, (req, res, next) => {
 
 /**
  * Removes a single item from an order
- * @see https://app.swaggerhub.com/apis/CloudyPadmal/Sysco-POS/1.0.0#/order/removeItemsInOrder
+ * @see 
  */
 router.put('/order/:id', VerifyToken, (req, res, next) => {
     ItemModel.findOneAndUpdate({ productID: req.body.productID },
@@ -174,7 +174,7 @@ router.put('/order/:id', VerifyToken, (req, res, next) => {
 
 /**
  * Updates item quantities in an order
- * @see https://app.swaggerhub.com/apis/CloudyPadmal/Sysco-POS/1.0.0#/order/updateItemsInOrder
+ * @see 
  */
 router.post('/order/:id', VerifyToken, (req, res, next) => {
     ItemModel.findOneAndUpdate({ productID: req.body.productID },

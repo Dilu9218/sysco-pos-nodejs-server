@@ -239,7 +239,7 @@ describe('Creates an order', function () {
 
     it('Creates a blank order with proper authorization', function (done) {
         request(app)
-            .post('/api/order/new')
+            .post('/api/order/order')
             .set('x-access-token', gToken)
             .expect(200).then(r => {
                 gOrderID = r.body._id;
@@ -248,12 +248,12 @@ describe('Creates an order', function () {
     });
     it('Creates an order without authorization', function (done) {
         request(app)
-            .post('/api/order/new')
+            .post('/api/order/order')
             .expect(403, done);
     });
     it('Creates an order with invalid token', function (done) {
         request(app)
-            .post('/api/order/new')
+            .post('/api/order/order')
             .set('x-access-token', gToken + 'z')
             .expect(500, done);
     });
@@ -459,7 +459,7 @@ describe('Adds item to an order', function () {
 
     it('Adds a new item to the order without authorization', function (done) {
         request(app)
-            .post(`/api/order/add/${lOrderID}`)
+            .put(`/api/order/item/${lOrderID}`)
             .send({
                 productID: 'NE-WPOS-TME',
                 quantity: 10
@@ -468,7 +468,7 @@ describe('Adds item to an order', function () {
     });
     it('Adds a new item to the order with invalid authorization', function (done) {
         request(app)
-            .post(`/api/order/add/${lOrderID}`)
+            .put(`/api/order/item/${lOrderID}`)
             .set('x-access-token', gToken + 'z')
             .send({
                 productID: 'NE-WPOS-TME',
@@ -478,7 +478,7 @@ describe('Adds item to an order', function () {
     });
     it('Adds a new item to the order', function (done) {
         request(app)
-            .post(`/api/order/add/${lOrderID}`)
+            .put(`/api/order/item/${lOrderID}`)
             .set('x-access-token', gToken)
             .send({
                 productID: 'NE-WPOS-TME',
@@ -493,7 +493,7 @@ describe('Adds item to an order', function () {
     });
     it('Adds a non existing item to the order', function (done) {
         request(app)
-            .post(`/api/order/add/${lOrderID}`)
+            .put(`/api/order/item/${lOrderID}`)
             .set('x-access-token', gToken)
             .send({
                 productID: 'NE-WNOS-TME',
@@ -503,7 +503,7 @@ describe('Adds item to an order', function () {
     });
     it('Adds an item with invalid data', function (done) {
         request(app)
-            .post(`/api/order/add/${lOrderID}`)
+            .put(`/api/order/item/${lOrderID}`)
             .set('x-access-token', gToken)
             .send({
                 productID: 'NE-WPOS-TME',
@@ -513,7 +513,7 @@ describe('Adds item to an order', function () {
     });
     it('Adds an item with invalid order', function (done) {
         request(app)
-            .post(`/api/order/add/${lOrderID}z`)
+            .put(`/api/order/item/${lOrderID}z`)
             .set('x-access-token', gToken)
             .send({
                 productID: 'NE-WPOS-TME',

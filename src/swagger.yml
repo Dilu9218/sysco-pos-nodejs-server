@@ -1,0 +1,667 @@
+swagger: '2.0'
+info:
+  description: This is API documentation for Sysco PoS system.
+  version: "1.0.1"
+  title: Sysco PoS
+  contact:
+    email: madhushanka.padmal@syscolabs.com
+
+host: localhost:8080
+basePath: /sysco/api
+schemes:
+ - http
+################################################################################
+################################################################################
+
+tags:
+- name: admin
+  description: Controls overall userbase and orders
+- name: user
+  description: Operations related to user and user accounts
+- name: order
+  description: Everything related to orders
+################################################################################
+################################################################################
+
+paths:
+  /admin/login:
+    post:
+      tags:
+      - admin
+      summary: logs in an admin
+      description: Logs an admin into the admin panel where everything can be controlled
+      operationId: logAdminIn
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: User object in JSON format with credentials valid for an admin
+        required: true
+        schema:
+          $ref: '#/definitions/User'
+      responses:
+        200:
+          description: successful operation
+        400:
+          description: password is wrong
+        403:
+          description: miscellaneous errors at the server side or configurations
+        404:
+          description: admin does not exist
+      security:
+      - api_key: []
+  /admin/logout:
+    get:
+      tags:
+      - admin
+      summary: logs out an admin
+      description: Logs an admin out of the system with valid user credentials.
+      operationId: logAdminOut
+      produces:
+      - application/json
+      parameters:
+      - name: auth_key
+        in: header
+        description: Authentication for the logged in user
+        required: true
+        type: string
+      responses:
+        200:
+          description: successful operation
+        403:
+          description: miscellaneous errors at the server side or configurations
+        404:
+          description: user does not exist
+      security:
+      - api_key: []
+  /admin/users:
+    get:
+      tags:
+      - admin
+      summary: lists all users in the system
+      description: List out all users registered in the system
+      operationId: listAdminUsers
+      produces:
+      - application/json
+      responses:
+        200:
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+        404:
+          description: no users found
+      security:
+      - api_key: []
+  /admin/user/add:
+    post:
+      tags:
+      - admin
+      summary: admin adds a user
+      description: Admin adds a user to user database
+      operationId: addAdminUser
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: User object in JSON format
+        required: true
+        schema:
+          $ref: '#/definitions/User'
+      responses:
+        200:
+          description: successful operation
+        400:
+          description: password is wrong
+        403:
+          description: miscellaneous errors at the server side or configurations
+        404:
+          description: admin does not exist
+      security:
+      - api_key: []
+  /admin/user/{id}:
+    get:
+      tags:
+      - admin
+      summary: fetches a user
+      description: Fetches a user specified by the ID
+      operationId: fetchAdminUser
+      produces:
+      - application/json
+      parameters:
+      - name: id
+        in: path
+        description: Required user ID
+        required: true
+        type: string
+      responses:
+        200:
+          description: successful operation
+          schema:
+            $ref: '#/definitions/User'
+        404:
+          description: no users found
+      security:
+      - api_key: []
+    delete:
+      tags:
+      - admin
+      summary: deletes a user
+      description: Deletes a user account from system
+      operationId: deleteAdminUser
+      produces:
+      - application/json
+      parameters:
+      - name: id
+        in: path
+        description: Required user ID
+        required: true
+        type: string
+      responses:
+        200:
+          description: successful operation
+        400:
+          description: user not found
+      security:
+      - api_key: []
+    put:
+      tags:
+      - admin
+      summary: admin updates a user
+      description: Admin updates a user in user database
+      operationId: updateAdminUser
+      produces:
+      - application/json
+      parameters:
+      - name: id
+        in: path
+        description: Required user ID
+        required: true
+        type: string
+      - in: body
+        name: body
+        description: User object in JSON format
+        required: true
+        schema:
+          $ref: '#/definitions/User'
+      responses:
+        200:
+          description: successful operation
+        400:
+          description: password is wrong
+        403:
+          description: miscellaneous errors at the server side or configurations
+        404:
+          description: admin does not exist
+      security:
+      - api_key: []
+################################################################################
+  /user/login:
+    post:
+      tags:
+      - user
+      summary: logs in a user
+      description: Logs a user into the system with valid user credentials
+      operationId: user_login
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: User object in JSON format with valid credentials
+        required: true
+        schema:
+          $ref: '#/definitions/LoginCredentials'
+      responses:
+        200:
+          description: User created successfully
+          schema:
+            $ref: '#/definitions/LoginSuccessful'
+        401:
+          description: Incorrect password
+          schema:
+            $ref: '#/definitions/LoginFailedPassword'
+        406:
+          description: User data missing
+          schema:
+            $ref: '#/definitions/LoginFailedUserdata'
+        404:
+          description: No user with provided username
+          schema:
+            $ref: '#/definitions/LoginFailedUsername'
+  /user/register:
+    post:
+      tags:
+      - user
+      summary: register a new user
+      description: Registers a new user with valid username and password
+      operationId: user_register
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: User object in JSON format with valid credentials
+        required: true
+        schema:
+          $ref: '#/definitions/LoginCredentials'
+      responses:
+        200:
+          description: User created successfully
+          schema:
+            $ref: '#/definitions/RegisterSuccessful'
+        409:
+          description: Duplicate user name
+          schema:
+            $ref: '#/definitions/RegisterFailedUsername'
+        406:
+          description: User data missing
+          schema:
+            $ref: '#/definitions/RegisterFailedUserdata'
+################################################################################
+  /order/list:
+    get:
+      tags:
+      - order
+      summary: fetches order list of a user
+      description: Fetches all the available orders linked to a user
+      operationId: order_list
+      produces:
+      - application/json
+      responses:
+        200:
+          description: orders found for this user
+          schema:
+            $ref: '#/definitions/OrderList'
+        403:
+          description: access token not provided
+          schema:
+            $ref: '#/definitions/AccessTokenMissing'
+        404:
+          description: there are no orders found for the user or other error
+          schema:
+            $ref: '#/definitions/OrderListError'
+        500:
+          description: invalid token provided
+          schema:
+            $ref: '#/definitions/InvalidToken'
+      security:
+      - api_key: []
+  /order/order:
+    post:
+      tags:
+      - order
+      summary: creates a new order
+      description: Inserts an entry to order collection to create a blank order
+      operationId: new_order
+      produces:
+      - application/json
+      responses:
+        200:  
+          description: order created
+          schema:
+            $ref: '#/definitions/BlankOrder'
+        403:
+          description: access token not provided
+          schema:
+            $ref: '#/definitions/AccessTokenMissing'
+        500:
+          description: invalid token provided
+          schema:
+            $ref: '#/definitions/InvalidToken'
+      security:
+      - api_key: []
+  /order/item/{order}:
+    put:
+      tags:
+      - order
+      summary: adds an item to order
+      description: Inserts a new item into items list in this order
+      operationId: order_add_item
+      produces:
+      - application/json
+      parameters:
+      - name: order
+        in: path
+        description: ID of the order the item needs to be put into 
+        required: true
+        type: string
+      - name: body
+        in: body
+        schema:
+          $ref: '#/definitions/UpdatingItem'
+      responses:
+        200:
+          description: item added. new order will be returned with items
+          schema:
+            $ref: '#/definitions/Order'
+        404:
+          description: item not found to be added
+          schema:
+            $ref: '#/definitions/ItemNotFoundError'
+        403:
+          description: access token not provided
+          schema:
+            $ref: '#/definitions/AccessTokenMissing'
+        500:
+          description: invalid token provided
+          schema:
+            $ref: '#/definitions/InvalidToken'
+      security:
+      - api_key: []
+    
+  /order/{order}:
+    get:
+      tags:
+      - order
+      summary: fetches an order
+      description: Fetches an order related to a user
+      operationId: orderFetchUser
+      produces:
+      - application/json
+      parameters:
+      - name: order
+        in: path
+        description: ID of the order needs to be updated 
+        required: true
+        type: string
+      responses:
+        200:
+          description: successful operation
+          schema:
+            $ref: '#/definitions/Order'
+      security:
+      - api_key: []
+    delete:
+      tags:
+      - order
+      summary: deletes an order
+      description: Deletes an order from database
+      operationId: orderDelete
+      produces:
+      - application/json
+      parameters:
+      - name: order
+        in: path
+        description: ID of the order needs to be updated 
+        required: true
+        type: string
+      responses:
+        200:
+          description: successful operation
+          schema:
+            $ref: '#/definitions/Order'
+      security:
+      - api_key: []
+    put:
+      tags:
+      - order
+      summary: removes a single item from order
+      description: Removes a single order from the current order
+      operationId: removeItemsInOrder
+      produces:
+      - application/json
+      parameters:
+      - name: order
+        in: path
+        description: ID of the order needs to be updated 
+        required: true
+        type: string
+      responses:
+        200:
+          description: successful operation
+          schema:
+            $ref: '#/definitions/Order'
+      security:
+      - api_key: []
+    post:
+      tags:
+      - order
+      summary: updates an order
+      description: Updates an order in database
+      operationId: updateItemsInOrder
+      produces:
+      - application/json
+      parameters:
+      - name: order
+        in: path
+        description: ID of the order needs to be updated 
+        required: true
+        type: string
+      - name: body
+        in: body
+        schema:
+          $ref: '#/definitions/UpdatingItem'
+      responses:
+        200:
+          description: successful operation
+          schema:
+            $ref: '#/definitions/Order'
+      security:
+      - api_key: []
+  /orders:
+    get:
+      tags:
+      - order
+      summary: returns a list of orders
+      description: Returns a list of orders related to a user
+      operationId: getUserOrders
+      parameters:
+      - name: user
+        in: header
+        description: User in context 
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        200:
+          description: successful operation
+          schema:
+           $ref: '#/definitions/Order'
+      security:
+      - api_key: []
+  
+################################################################################
+################################################################################
+
+securityDefinitions:
+  petstore_auth:
+    type: oauth2
+    authorizationUrl: http://petstore.swagger.io/oauth/dialog
+    flow: implicit
+    scopes:
+      write:pets: modify pets in your account
+      read:pets: read your pets
+  api_key:
+    type: apiKey
+    name: api_key
+    in: header
+################################################################################
+################################################################################
+
+definitions:
+################################################################################
+  AccessTokenMissing:
+    type: object
+    properties:
+      error:
+        type: string
+        example:  'Token not provided'
+  InvalidToken:
+    type: object
+    properties:
+      error:
+        type: string
+        example: 'Invalid token'
+################################################################################
+  LoginCredentials:
+    type: object
+    properties:
+      username:
+        type: string
+        description: Username used to register with the system
+        example: 'Padmal'
+      password:
+        type: string
+        description: Password used to register with the system
+        example: 'abc123'
+  LoginSuccessful:
+    type: object
+    properties:
+      status:
+        type: string
+        description: status of the login
+        example: Logged in successfully
+      token:
+        type: string
+        description: JWT signed key paired with secret valid for 1 day
+        example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ...awuAY'
+  LoginFailedUsername:
+    type: object
+    properties:
+      error:
+        type: string
+        description: Error message related to the issue with login
+        example: 'No user with provided username'
+  LoginFailedPassword:
+    type: object
+    properties:
+      error:
+        type: string
+        description: Error message related to the issue with login
+        example: 'Incorrect password'
+  LoginFailedUserdata:
+    type: object
+    properties:
+      error:
+        type: string
+        description: Error message related to the issue with login
+        example: 'User data missing'
+  RegisterSuccessful:
+    type: object
+    properties:
+      status:
+        type: string
+        description: status of register operation
+        example: 'User created successfully'
+  RegisterFailedUsername:
+    type: object
+    properties:
+      error:
+        type: string
+        description: error status of register operation
+        example: 'Duplicate user name'
+  RegisterFailedUserdata:
+    type: object
+    properties:
+      error:
+        type: string
+        description: error status of register operation
+        example: 'User data missing'
+################################################################################
+  OrderListError:
+    type: object
+    properties:
+      error:
+        type: string
+        description: Error related to orderlist
+        example: 'No orders found for this user'
+  ItemNotFoundError:
+    type: object
+    properties:
+      error:
+        type: string
+        example: 'Item not found'
+################################################################################
+  User:
+    type: object
+    properties:
+      _id:
+        type: string
+        description: Autogenerated ID from MongoDB
+      username:
+        type: string
+        description: User name
+      password:
+        type: string
+        description: Password saved in hash format
+      isAdmin:
+        type: boolean
+        description: Status of user
+  Order:
+    type: object
+    properties:
+      _id:
+        type: integer
+        format: int64
+        description: mongodb generated unique key for this order
+        example: 5c6e6cf05469574dd5c6e8b3
+      cartID:
+        type: integer
+        format: int64
+        description: _id of user who created this order
+        example: 5c6e6cf05219399a76c453b3
+      items:
+        type: array
+        items:
+          $ref: '#/definitions/Item'
+  BlankOrder:
+    type: object
+    properties:
+      _id:
+        type: integer
+        format: int64
+        description: mongodb generated unique key for this order
+        example: 5c6e6cf05469574dd5c6e8b3
+      cartID:
+        type: integer
+        format: int64
+        description: _id of user who created this order
+        example: 5c6e6cf05219399a76c453b3
+      items:
+        type: object
+        example: []
+  Item:
+    type: object
+    properties:
+      _id:
+        type: string
+        description: mongodb key looks similar to "5c6e6cf05469574dd5c6e8b3"
+      productID:
+        type: string
+        description: string similar to "9X-X5T-ZTK" which is unique for an item
+      productTitle:
+        type: string
+        description: name of the item
+      quantity:
+        type: integer
+        format: int32
+        description: number of entities available in the item
+      description:
+        type: string
+        description: a long text containing a description about the item
+      price:
+        type: number
+        description: unit price of the item
+      __v:
+        type: integer
+        description: ID number assigned with mongodb. Not to care about
+  OrderList:
+    type: array
+    items:
+      $ref: '#/definitions/Order'
+  UpdatingItem:
+    type: object
+    properties:
+      quantity:
+        type: integer
+        format: int32
+        example: 13
+      productID:
+        type: string
+        description: unique ID of a product
+        example: "9X-X5T-ZTK"
