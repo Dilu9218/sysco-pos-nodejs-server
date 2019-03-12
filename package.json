@@ -1,6 +1,6 @@
 {
   "name": "nodejsserver",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "main": "server.js",
   "engines": {
@@ -15,8 +15,7 @@
     "jsonwebtoken": "^8.4.0",
     "mongodb": "^3.1.13",
     "mongoose": "^5.4.13",
-    "supertest": "^3.4.2",
-    "uuid": "^3.3.2"
+    "supertest": "^3.4.2"
   },
   "devDependencies": {},
   "scripts": {
