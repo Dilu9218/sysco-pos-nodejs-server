@@ -8,10 +8,13 @@ class Database {
     }
 
     connectToMongo() {
-        //mongoose.connect('mongodb://localhost:27017/posdb', { useNewUrlParser: true })
-        mongoose.connect('mongodb+srv://Padmal:abcd@1234@syscoposcluster-triov.mongodb.net/test?retryWrites=true', { useNewUrlParser: true })
+        mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true })
             .then(res => { });
     }
 }
 
-module.exports = new Database()
+module.exports = new Database();
+/***************************************************************************************************
+ * 'mongodb://localhost:27017/posdb'
+ * 'mongodb+srv://Padmal:abcd@1234@syscoposcluster-triov.mongodb.net/test?retryWrites=true'
+ **************************************************************************************************/
