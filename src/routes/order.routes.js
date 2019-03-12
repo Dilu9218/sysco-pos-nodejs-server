@@ -144,6 +144,24 @@ router.delete('/order/:id', VerifyToken, (req, res, next) => {
 });
 
 /***************************************************************************************************
+ * Updates item quantity in an order
+ * @see 
+ **************************************************************************************************/
+router.patch('/order/:id', VerifyToken, (req, res, next) => {
+    ItemModel.findOneAndUpdate({ productID: req.body.productID },
+        { $inc: { quantity: -req.body.difference } }, { new: true }).then(doc => {
+            OrderModel.findOneAndUpdate({ _id: req.params.id, "items.productID": req.body.productID },
+                { $set: { "items.$.quantity": req.body.quantity } }, { new: true }).then(updatedOrder => {
+                    return res.status(200).json(updatedOrder);
+                }).catch(err => {
+                    return res.status(405).json({ 'error': 'Cannot find such order' });
+                })
+        }).catch(err => {
+            return res.status(404).json({ 'error': 'Item not found' });
+        });
+});
+
+/**
  * Checks out an order
  * @see 
  **************************************************************************************************/
@@ -176,22 +194,6 @@ router.put('/order/:id', VerifyToken, (req, res, next) => {
         });
 });
 
-/**
- * Updates item quantities in an order
- * @see 
- */
-router.post('/order/:id', VerifyToken, (req, res, next) => {
-    ItemModel.findOneAndUpdate({ productID: req.body.productID },
-        { $inc: { quantity: -req.body.difference } }, { new: true }).then(doc => {
-            OrderModel.findOneAndUpdate({ _id: req.params.id, "items.productID": req.body.productID },
-                { $set: { "items.$.quantity": req.body.quantity } }, { new: true }).then(updatedOrder => {
-                    return res.status(200).json(updatedOrder);
-                }).catch(err => {
-                    return res.status(405).json({ 'error': 'Cannot find such order' });
-                })
-        }).catch(err => {
-            return res.status(404).json({ 'error': 'Cannot facilitate the request' });
-        });
-});
+
 
 module.exports = router
