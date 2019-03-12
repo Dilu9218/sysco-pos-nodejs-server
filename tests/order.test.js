@@ -908,7 +908,7 @@ describe('Adds multiple items to an order', function () {
 
     it('Adds multiple items with proper authorization', function (done) {
         request(app)
-            .put(`/api/order/add/${localOrderID}`)
+            .put(`/api/order/items/${localOrderID}`)
             .set('x-access-token', gToken)
             .send({
                 items: {
@@ -932,7 +932,7 @@ describe('Adds multiple items to an order', function () {
     });
     it('Adds multiple items without proper authorization', function (done) {
         request(app)
-            .put(`/api/order/add/${localOrderID}`)
+            .put(`/api/order/items/${localOrderID}`)
             .set('x-access-token', gToken + 'z')
             .send({
                 items: {
@@ -945,7 +945,7 @@ describe('Adds multiple items to an order', function () {
     });
     it('Adds multiple items to an invalid order', function (done) {
         request(app)
-            .put(`/api/order/add/${localOrderID}z`)
+            .put(`/api/order/items/${localOrderID}z`)
             .set('x-access-token', gToken)
             .send({
                 items: {
@@ -958,7 +958,7 @@ describe('Adds multiple items to an order', function () {
     });
     it('Adds an invalid item to an order', function (done) {
         request(app)
-            .put(`/api/order/add/${localOrderID}`)
+            .put(`/api/order/items/${localOrderID}`)
             .set('x-access-token', gToken)
             .send({
                 items: {
@@ -976,7 +976,7 @@ describe('Adds multiple items to an order', function () {
     });
     it('Adds no items to an order', function (done) {
         request(app)
-            .put(`/api/order/add/${localOrderID}`)
+            .put(`/api/order/items/${localOrderID}`)
             .set('x-access-token', gToken)
             .expect(400, done);
     });

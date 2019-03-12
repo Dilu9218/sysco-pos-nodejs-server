@@ -59,7 +59,7 @@ router.put('/item/:id', VerifyToken, (req, res, next) => {
 
 /***************************************************************************************************
  * Adds a set of items to an order
- * @see 
+ * @see https://app.swaggerhub.com/apis/CloudyPadmal/Sysco-POS/1.0.1#/order/order_add_items
  **************************************************************************************************/
 router.put('/items/:id', VerifyToken, (req, res, next) => {
     // Need to add every item requested to add to this order
@@ -104,23 +104,10 @@ router.put('/items/:id', VerifyToken, (req, res, next) => {
     }
 });
 
-/**
- * Checks out an order
- * @see 
- */
-router.delete('/checkout/:id', VerifyToken, (req, res, next) => {
-    OrderModel.findOneAndDelete(
-        { _id: req.params.id }).then(doc => {
-            return res.status(200).json(doc);
-        }).catch(er => {
-            return res.status(404).json({ 'status': 'Order not found' });
-        });
-});
-
-/**
+/***************************************************************************************************
  * Fetches an order by its ID
- * @see 
- */
+ * @see https://app.swaggerhub.com/apis/CloudyPadmal/Sysco-POS/1.0.1#/order/get_this_order
+ **************************************************************************************************/
 router.get('/order/:id', VerifyToken, (req, res, next) => {
     OrderModel
         .findOne({ _id: req.params.id })
@@ -132,10 +119,10 @@ router.get('/order/:id', VerifyToken, (req, res, next) => {
         });
 });
 
-/**
+/***************************************************************************************************
  * Deletes an order and increment count in respective items
- * @see 
- */
+ * @see https://app.swaggerhub.com/apis/CloudyPadmal/Sysco-POS/1.0.1#/order/delete_this_order
+ **************************************************************************************************/
 router.delete('/order/:id', VerifyToken, (req, res, next) => {
     OrderModel.findOneAndDelete(
         { _id: req.params.id }).then(doc => {
@@ -152,9 +139,26 @@ router.delete('/order/:id', VerifyToken, (req, res, next) => {
                 return res.status(200).json(doc);
             }
         }).catch(er => {
-            return res.status(404).end();
+            res.status(404).end();
         });
 });
+
+/***************************************************************************************************
+ * Checks out an order
+ * @see 
+ **************************************************************************************************/
+router.delete('/checkout/:id', VerifyToken, (req, res, next) => {
+    OrderModel.findOneAndDelete(
+        { _id: req.params.id }).then(doc => {
+            return res.status(200).json(doc);
+        }).catch(er => {
+            return res.status(404).json({ 'status': 'Order not found' });
+        });
+});
+
+
+
+
 
 /**
  * Removes a single item from an order
