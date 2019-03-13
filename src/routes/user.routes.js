@@ -42,7 +42,7 @@ router.post('/login', function (req, res) {
                 return res.status(401).json({ 'error': 'Incorrect password' });
             }
             var token = jwt.sign({ id: user._id }, config.secret, {
-                expiresIn: (24 * 60 * 60)
+                expiresIn: (30 * 24 * 60 * 60)
             });
             return res.status(200).json({ 'status': 'Logged in successfully', token: token });
         });
