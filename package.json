@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "codacy-coverage": "^3.4.0",
     "codecov": "^3.2.0",
     "cors": "^2.8.5",
     "dotenv": "^7.0.0",
@@ -22,6 +23,7 @@
   "devDependencies": {},
   "scripts": {
     "test": "jest --detectOpenHandles --verbose --forceExit && codecov",
+    "test-with-coverage": "jest --detectOpenHandles --verbose --coverage && cat ./coverage/lcov.info | codacy-coverage",
     "start": "node server.js",
     "mystart": "nodemon server.js"
   },

@@ -11,11 +11,11 @@ env:
   global:
     - DATABASE_URL=mongodb://localhost:27017/posdb
     - CODECOV_TOKEN="63753f62-b3a7-417e-bfd4-a19f249d75c2"
+    - CODACY_ACCOUNT_TOKEN=4dfb92f589ca43b7997b805942268e18
 before_install:
   - npm config set loglevel warn
 install: 
   - npm ci
-  - npm i -g codecov
 before_script:
   - sleep 15
   - mongo posdb --eval 'db.createUser({user:"travis",pwd:"test",roles:["readWrite"]});'
@@ -23,5 +23,4 @@ jobs:
   include:
     - stage: Unit and Integration tests
       script: 
-        - npm test
-        - codecov
+        - npm run test-with-coverage
