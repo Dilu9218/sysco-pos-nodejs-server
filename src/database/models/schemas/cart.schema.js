@@ -1,5 +1,5 @@
 let mongoose = require("mongoose");
-let orderSchema = require("./order.schema")
+let orderSchema = require("./order.schema");
 
 // A user will have only one cart. In this cart, there can be multiple
 // orders with each order having multiple items

@@ -10,10 +10,10 @@ var OrderModel = require("../database/models/order.model");
  **************************************************************************************************/
 router.get("/list", VerifyToken, (req, res, next) => {
     // Each order will have userID as it"s cart ID
-    OrderModel.find({ cartID: req._id }).then(docs => {
+    OrderModel.find({ cartID: req._id }).then((docs) => {
         if (docs.length === 0) throw new Error("No orders found for this user");
         return res.status(200).json(docs);
-    }).catch(err => {
+    }).catch((err) => {
         return res.status(404).json({ error: "No orders found for this user" });
     });
 });
@@ -27,7 +27,7 @@ router.post("/order", VerifyToken, (req, res, next) => {
         cartID: req._id,
         items: []
     });
-    o.save().then(doc => {
+    o.save().then((doc) => {
         res.status(200).json(doc);
     });
 });
@@ -39,19 +39,19 @@ router.post("/order", VerifyToken, (req, res, next) => {
 router.put("/item/:id", VerifyToken, (req, res, next) => {
     // Fetch the item from item pool and decrement the amount from item quantity
     ItemModel.findOneAndUpdate({ productID: req.body.productID }, { $inc: { quantity: -req.body.quantity } })
-        .then(item => {
+        .then((item) => {
             // Clone the item so that we can add it to our order as a seperate item
             let newItem = item;
             // Set it"s quantity as the purchased quantity
             newItem.quantity = req.body.quantity;
             // Update our order with the new item
             OrderModel.findOneAndUpdate({ _id: req.params.id }, { $push: { items: newItem } }, { new: true })
-                .then(newOrder => {
+                .then((newOrder) => {
                     return res.status(200).json(newOrder);
-                }).catch(err => {
+                }).catch((err) => {
                     return res.status(500).json({ "error": "Error adding item to list" });
                 });
-        }).catch(err => {
+        }).catch((err) => {
             // Don"t worry this won"t happen as I will handle this validation from front end
             return res.status(404).json({ "error": "Item not found" });
         });
@@ -72,7 +72,7 @@ router.put("/items/:id", VerifyToken, (req, res, next) => {
                 ItemModel.findOneAndUpdate(
                     { productID },
                     { $inc: { quantity: -req.body.items[productID] } })
-                    .then(item => {
+                    .then((item) => {
                         // Clone the item so that we can add it to our order as a seperate item
                         let newItem = item;
                         // Set it"s quantity as the purchased quantity
@@ -81,10 +81,10 @@ router.put("/items/:id", VerifyToken, (req, res, next) => {
                         OrderModel.findOneAndUpdate(
                             { _id: req.params.id },
                             { $push: { items: newItem } }, { new: true })
-                            .then(newOrder => { resolve(newOrder); }).catch(e => {
+                            .then((newOrder) => { resolve(newOrder); }).catch((e) => {
                                 reject({ "error": 404 });
                             });
-                    }).catch(e => {
+                    }).catch((e) => {
                         reject({ "error": 404 });
                     });
             }));
@@ -92,8 +92,8 @@ router.put("/items/:id", VerifyToken, (req, res, next) => {
         let errCount = 0;
         let error = undefined;
         Promise.all(
-            itemPromises.map(p => p.catch(e => { errCount++; error = e; }))
-        ).then(r => {
+            itemPromises.map((p) => p.catch(e => { errCount++; error = e; }))
+        ).then((r) => {
             if (errCount > 0) {
                 res.status(error["error"]).end();
             }
@@ -110,13 +110,13 @@ router.put("/items/:id", VerifyToken, (req, res, next) => {
  **************************************************************************************************/
 router.patch("/item/:id", VerifyToken, (req, res, next) => {
     ItemModel.findOneAndUpdate({ productID: req.body.productID },
-        { $inc: { quantity: req.body.quantity } }, { new: true }).then(doc => {
+        { $inc: { quantity: req.body.quantity } }, { new: true }).then((doc) => {
             OrderModel.findOneAndUpdate({ _id: req.params.id },
                 { $pull: { items: { productID: req.body.productID } } }, { new: true })
-                .then(updatedOrder => {
+                .then((updatedOrder) => {
                     return res.status(200).json(updatedOrder);
                 });
-        }).catch(err => {
+        }).catch((err) => {
             return res.status(404).json({ "error": "Item not found" });
         });
 });
@@ -131,7 +131,7 @@ router.get("/order/:id", VerifyToken, (req, res, next) => {
         .then(doc => {
             res.status(200).json(doc);
         })
-        .catch(er => {
+        .catch((err) => {
             res.status(404).json({ "error": "Cannot find such order" });
         });
 });
@@ -142,20 +142,20 @@ router.get("/order/:id", VerifyToken, (req, res, next) => {
  **************************************************************************************************/
 router.delete("/order/:id", VerifyToken, (req, res, next) => {
     OrderModel.findOneAndDelete(
-        { _id: req.params.id }).then(doc => {
+        { _id: req.params.id }).then((doc) => {
             let itemList = doc.items;
             // There are items in the order, We need to add them back to global items
             if (itemList.length > 0) {
-                itemList.forEach(item => {
+                itemList.forEach((item) => {
                     ItemModel.findOneAndUpdate({ productID: item.productID },
                         { $inc: { quantity: item.quantity } }, { new: true })
-                        .then(item => { });
+                        .then((item) => { });
                     return res.status(200).json(itemList);
                 });
             } else {
                 return res.status(200).json(doc);
             }
-        }).catch(er => {
+        }).catch((err) => {
             res.status(404).end();
         });
 });
@@ -166,17 +166,17 @@ router.delete("/order/:id", VerifyToken, (req, res, next) => {
  **************************************************************************************************/
 router.patch("/order/:id", VerifyToken, (req, res, next) => {
     ItemModel.findOneAndUpdate({ productID: req.body.productID },
-        { $inc: { quantity: -req.body.difference } }, { new: true }).then(doc => {
+        { $inc: { quantity: -req.body.difference } }, { new: true }).then((doc) => {
             OrderModel.findOneAndUpdate({
                 _id: req.params.id, "items.productID": req.body.productID
             },
                 { $set: { "items.$.quantity": req.body.quantity } }, { new: true })
-                .then(updatedOrder => {
+                .then((updatedOrder) => {
                     return res.status(200).json(updatedOrder);
-                }).catch(err => {
+                }).catch((err) => {
                     return res.status(405).json({ "error": "Cannot find such order" });
                 })
-        }).catch(err => {
+        }).catch((err) => {
             return res.status(404).json({ "error": "Item not found" });
         });
 });
@@ -187,11 +187,11 @@ router.patch("/order/:id", VerifyToken, (req, res, next) => {
  **************************************************************************************************/
 router.post("/checkout/:id", VerifyToken, (req, res, next) => {
     OrderModel.findOneAndDelete(
-        { _id: req.params.id }).then(doc => {
+        { _id: req.params.id }).then((doc) => {
             return res.status(200).json(doc);
-        }).catch(er => {
+        }).catch((err) => {
             return res.status(404).json({ "status": "Cannot find such order" });
         });
 });
 
-module.exports = router
+module.exports = router;

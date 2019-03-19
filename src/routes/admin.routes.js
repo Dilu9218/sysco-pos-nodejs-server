@@ -11,7 +11,7 @@ router.post("/user/add", VerifyToken, (req, res, next) => {
     let t = new AdminModel(req.body);
     t.save().then(() => {
         return res.status(200).json({ "status": "User created" });
-    }).catch(err => {
+    }).catch((err) => {
         if (err.name === "MongoError" && err.code === 11000) {
             return res.status(409).json({ "error": "Duplicate user name" });
         } else {
@@ -27,7 +27,7 @@ router.get("/users", VerifyToken, (req, res, next) => {
     }
     AdminModel
         .find({})
-        .then(doc => {
+        .then((doc) => {
             return res.status(200).json(doc);
         });
 });
@@ -39,10 +39,10 @@ router.get("/user/:id", VerifyToken, (req, res, next) => {
     }
     AdminModel
         .find({ _id: req.params.id })
-        .then(doc => {
+        .then((doc) => {
             return res.status(200).json(doc);
         })
-        .catch(err => {
+        .catch((err) => {
             return res.status(404).json({ "status": "User not found" });
         });
 });
@@ -55,7 +55,7 @@ router.put("/user/:id", VerifyToken, (req, res, next) => {
     AdminModel.findOneAndUpdate(
         { _id: req.params.id }, { username: req.body.username }, { new: true }).then(doc => {
             return res.status(200).json(doc);
-        }).catch(er => {
+        }).catch((err) => {
             return res.status(404).json({ "status": "User not found" });
         });
 });
@@ -66,11 +66,11 @@ router.delete("/user/:id", VerifyToken, (req, res, next) => {
         return res.status(403).json({ "error": "Not enough priviledges" });
     }
     AdminModel.findOneAndDelete(
-        { _id: req.params.id }).then(doc => {
+        { _id: req.params.id }).then((doc) => {
             return res.status(200).json(doc);
-        }).catch(er => {
+        }).catch((err) => {
             return res.status(404).json({ "status": "User not found" });
         });
 });
 
-module.exports = router
+module.exports = router;

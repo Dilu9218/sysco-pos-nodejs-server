@@ -1,7 +1,7 @@
 const cors = require("cors");
 const express = require("express");
 const bodyParser = require("body-parser");
-const path = require("path")
+const path = require("path");
 require("./src/database/database");
 
 var tests = require("./src/routes/test.routes");
@@ -29,11 +29,11 @@ app.use("/api/order", order);
 app.use("/api/item", item);
 
 app.use((req, res, next) => {
-    res.sendFile(path.join(__dirname, "./public/404.html"))
+    res.sendFile(path.join(__dirname, "./public/404.html"));
 });
 
 app.use((err, req, res, next) => {
-    res.sendFile(path.join(__dirname, "./public/500.html"))
+    res.sendFile(path.join(__dirname, "./public/500.html"));
 });
 
 module.exports = app;

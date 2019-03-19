@@ -18,9 +18,9 @@ router.post("/register", function (req, res) {
             password: pwd_hashed,
             isAdmin: false
         });
-        u.save().then(savedUser => {
+        u.save().then((savedUser) => {
             return res.status(200).send({ "status": "User created successfully" });
-        }).catch(err => {
+        }).catch((err) => {
             return res.status(409).json({ "error": "Duplicate user name" });
         });
     } else {
@@ -34,7 +34,7 @@ router.post("/register", function (req, res) {
  * */
 router.post("/login", function (req, res) {
     if (req.body.username && req.body.password) {
-        UserModel.findOne({ username: req.body.username }).then(user => {
+        UserModel.findOne({ username: req.body.username }).then((user) => {
             if (!user) {
                 return res.status(404).json({ "error": "No user with provided username" });
             }
@@ -51,4 +51,4 @@ router.post("/login", function (req, res) {
     }
 });
 
-module.exports = router
+module.exports = router;

@@ -11,11 +11,11 @@ function ValidateToken(req, res, next) {
             if (err) {
                 return res.status(500).send({ error: "Invalid token" });
             } else {
-                user.findById(decoded.id).then(doc => {
+                user.findById(decoded.id).then((doc) => {
                     req._id = doc._id;
                     req._admin = doc.isAdmin;
                     next();
-                }).catch(err => {
+                }).catch((err) => {
                     return res.status(404).send({ error: "User not found" });
                 });
             }

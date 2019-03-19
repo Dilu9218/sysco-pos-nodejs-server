@@ -11,10 +11,10 @@ class Database {
     connectToMongo() {
         try {
             mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true })
-                .then(res => { })
-                .catch(err => {
+                .then((res) => { })
+                .catch((err) => {
                     /* istanbul ignore next */
-                    console.error(err)
+                    console.error(err);
                 });
         } catch (e) {
             /* istanbul ignore next */
