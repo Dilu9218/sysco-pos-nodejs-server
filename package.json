@@ -23,7 +23,6 @@
   "devDependencies": {},
   "scripts": {
     "test": "jest --detectOpenHandles --verbose --forceExit && codecov",
-    "test-with-coverage": "jest --detectOpenHandles --verbose --coverage --forceExit && cat ./coverage/lcov.info | codacy-coverage --accountToken 4dfb92f589ca43b7997b805942268e18 --username CloudyPadmal --projectName sysco-pos-nodejs-server",
     "start": "node server.js",
     "mystart": "nodemon server.js"
   },
