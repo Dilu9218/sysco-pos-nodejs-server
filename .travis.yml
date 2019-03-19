@@ -19,11 +19,10 @@ install:
   - npm ci
   - npm install codecov
 before_script:
-  - sleep 15
+  - sleep 5
   - mongo posdb --eval 'db.createUser({user:"travis",pwd:"test",roles:["readWrite"]});'
 jobs:
   include:
     - stage: Unit and Integration tests
       script: 
         - npm test
-        - codecov
