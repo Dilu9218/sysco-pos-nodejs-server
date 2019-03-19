@@ -6,3 +6,5 @@
 ![GitHub stars](https://img.shields.io/github/stars/CloudyPadmal/sysco-pos-nodejs-server.svg)
 ![GitHub Release Date](https://img.shields.io/github/release-date/CloudyPadmal/sysco-pos-nodejs-server.svg)
 ![Website](https://img.shields.io/website/https/sysco-pos-rest-api.herokuapp.com/api.svg?down_color=lightgrey&down_message=offline&up_color=green&up_message=online)
+![GitHub repo size in bytes](https://img.shields.io/github/repo-size/CloudyPadmal/sysco-pos-nodejs-server.svg)
+![Repo description](https://img.shields.io/badge/endpoint-backend-blueviolet.svg)
