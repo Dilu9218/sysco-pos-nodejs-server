@@ -1,17 +1,22 @@
 let mongoose = require('mongoose');
+require('dotenv').config();
 mongoose.set('useCreateIndex', true);
 mongoose.set('useFindAndModify', false);
 
 class Database {
     constructor() {
-        this.connectToMongo()
+        this.connectToMongo();
     }
 
     connectToMongo() {
-        console.log(process.env.DATABASE_URL);
-        mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true })
-            .then(res => { })
-            .catch(err => console.log(err));
+        try {
+            mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true })
+                .then(res => { })
+                .catch(err => console.error(err));
+        } catch (e) {
+            console.log('Hello, Database is not defined. Try the following command in console: \
+            export DATABASE_URL=mongodb://localhost:27017/posdb');
+        }
     }
 }
 
