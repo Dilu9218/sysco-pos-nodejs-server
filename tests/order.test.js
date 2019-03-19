@@ -66,7 +66,7 @@ beforeAll(async (done) => {
         "productTitle": "Test Item",
         "quantity": 999,
         "description": "This is a test item generated for testing",
-        "price": 1000.00
+        "price": 1000
     });
     await UserModel.insertMany([orderingUser, noorderingUser]).then((users) => {
         gUserID = users[0]._id;
@@ -94,9 +94,9 @@ describe("Adding new items to database", function () {
             .send({
                 "productID": generateItemCode(),
                 "productTitle": generateUserName(),
-                "quantity": parseInt(Math.random() * 50),
+                "quantity": parseInt(Math.random() * 50, 10),
                 "description": generateDescription(),
-                "price": parseInt(Math.random() * 1000) / 100
+                "price": parseInt(Math.random() * 1000, 10) / 100
             })
             .expect(200).then((res) => {
                 testItemAdded = res.body.id;
@@ -110,9 +110,9 @@ describe("Adding new items to database", function () {
             .send({
                 "productID": generateItemCode(),
                 "productTitle": generateUserName(),
-                "quantity": parseInt(Math.random() * 50),
+                "quantity": parseInt(Math.random() * 50, 10),
                 "description": "Random item description is here",
-                "price": parseInt(Math.random() * 1000) / 100
+                "price": parseInt(Math.random() * 1000, 10) / 100
             })
             .expect(500, done);
     });
@@ -315,14 +315,14 @@ describe("User fetches a list of items", function () {
             productTitle: "Test Item Three",
             quantity: 50,
             description: "This is the third test item created",
-            price: 89.00
+            price: 89
         });
         let testItem2 = new ItemModel({
             productID: "DD-SEC-OND",
             productTitle: "Test Item Four",
             quantity: 34,
             description: "This is the fourth test item created",
-            price: 175.50
+            price: 175.5
         });
         var itemz = [testItem1, testItem2];
         let testOrder = new OrderModel({
@@ -445,7 +445,7 @@ describe("Adds item to an order", function () {
             productTitle: "New Adding Method",
             quantity: 500,
             description: "This is a test item created to test adding a new item",
-            price: 250.00
+            price: 250
         });
         // Save the test item
         await testItem.save().then((doc) => {
@@ -562,14 +562,14 @@ describe("Deleting an order", function () {
             productTitle: "Item Under Test 01",
             quantity: 490,
             description: "This item has 490 at the beginning",
-            price: 250.00
+            price: 250
         });
         let testItem1C = new ItemModel({
             productID: "TH-ENE-W01",
             productTitle: "Item Under Test 01",
             quantity: 10,
             description: "This item was added to order",
-            price: 250.00
+            price: 250
         });
 
         let testItem2 = new ItemModel({
@@ -678,14 +678,14 @@ describe("Removing an item from an order", function () {
             productTitle: "Order Item 02",
             quantity: 1000,
             description: "This item has 1000 items at the beginning",
-            price: 300.00
+            price: 300
         });
         let testItem2C = new ItemModel({
             productID: "OR-DER-IT2",
             productTitle: "Order Item 02",
             quantity: 200,
             description: "This is also added to the order",
-            price: 300.00
+            price: 300
         });
 
         let testOrder = new OrderModel({
@@ -772,14 +772,14 @@ describe("Changing an item in an order", function () {
             productTitle: "Order Item 02",
             quantity: 1000,
             description: "This item has 1000 items at the beginning",
-            price: 300.00
+            price: 300
         });
         let testItem2C = new ItemModel({
             productID: "OR-DER-222",
             productTitle: "Order Item 02",
             quantity: 100,
             description: "This is also added to the order",
-            price: 300.00
+            price: 300
         });
 
         let testOrder = new OrderModel({
@@ -855,7 +855,7 @@ describe("Changing an item in an order", function () {
                     done();
                 });
             });
-        })
+        });
     });
 });
 
@@ -869,21 +869,21 @@ describe("Adds multiple items to an order", function () {
             productTitle: "Multiple Item One",
             quantity: 500,
             description: "This is the first test item created to test multiple item addition",
-            price: 250.00
+            price: 250
         });
         let testItem2 = new ItemModel({
             productID: "MU-LTI-PL2",
             productTitle: "Multiple Item Two",
             quantity: 400,
             description: "This is the second test item created to test multiple item addition",
-            price: 350.00
+            price: 350
         });
         let testItem3 = new ItemModel({
             productID: "MU-LTI-PL3",
             productTitle: "Multiple Item Three",
             quantity: 700,
             description: "This is the third test item created to test multiple item addition",
-            price: 150.00
+            price: 150
         });
         let testOrder = new OrderModel({
             cartID: "CartForMultipleItems",

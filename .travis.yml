@@ -15,7 +15,7 @@ before_install:
   - npm config set loglevel warn
 install: 
   - npm ci
-  - npm install -g codecov
+  - npm i -g codecov
 before_script:
   - sleep 15
   - mongo posdb --eval 'db.createUser({user:"travis",pwd:"test",roles:["readWrite"]});'
@@ -23,5 +23,3 @@ jobs:
   include:
     - stage: Unit and Integration tests
       script: npm test
-after_script:
-  echo 'All done :)'

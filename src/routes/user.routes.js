@@ -46,7 +46,7 @@ router.post("/login", function (req, res) {
             });
             return res.status(200).json({
                 status: "Logged in successfully",
-                token: token
+                token
             });
         });
     } else {
