@@ -4,9 +4,6 @@ node_js:
  - "node"
 services:
  - mongodb
-cache:
-  directories:
-    - '$HOME/.npm'
 env:
   global:
     - DATABASE_URL=mongodb://localhost:27017/posdb
