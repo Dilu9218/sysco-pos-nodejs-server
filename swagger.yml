@@ -352,7 +352,7 @@ paths:
             $ref: '#/definitions/InvalidToken'
       security:
       - api_key: []
-    delete:
+    patch:
       tags:
       - order
       summary: deletes an item from order

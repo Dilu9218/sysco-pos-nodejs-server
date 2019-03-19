@@ -12,8 +12,12 @@ class Database {
         try {
             mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true })
                 .then(res => { })
-                .catch(err => console.error(err));
+                .catch(err => {
+                    /* istanbul ignore next */
+                    console.error(err)
+                });
         } catch (e) {
+            /* istanbul ignore next */
             console.log('Hello, Database is not defined. Try the following command in console: \
             export DATABASE_URL=mongodb://localhost:27017/posdb');
         }

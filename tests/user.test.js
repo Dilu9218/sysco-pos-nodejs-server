@@ -1,6 +1,9 @@
 const request = require('supertest');
 const app = require('../app');
+var jwt = require('jsonwebtoken');
+const config = require('../src/auth/config');
 const UserModel = require('../src/database/models/user.model');
+var ValidateToken = require('../src/auth/verifytoken');
 
 var ltoken = undefined;
 var gUser = undefined;
@@ -110,6 +113,22 @@ describe('User tries to log in', function () {
                 password
             })
             .expect(404, done);
+    });
+});
+
+describe('Find a non existing user', () => {
+    it('Logs in with an invalid username', function (done) {
+        var token = jwt.sign({ id: 'invaliduser' }, config.secret, {
+            expiresIn: (30 * 24 * 60 * 60)
+        });
+        var res = {
+            status(n) { return { send(N) { return n + N; } } },
+        };
+        var req = {};
+        req.headers = { 'x-access-token': token };
+        var result = ValidateToken(req, res, () => { });
+        expect(result).toBe(undefined);
+        done();
     });
 });
 
