@@ -53,7 +53,7 @@ router.put("/user/:id", VerifyToken, (req, res, next) => {
         return res.status(403).json({ "error": "Not enough priviledges" });
     }
     AdminModel.findOneAndUpdate(
-        { _id: req.params.id }, { username: req.body.username }, { new: true }).then(doc => {
+        { _id: req.params.id }, { username: req.body.username }, { new: true }).then((doc) => {
             return res.status(200).json(doc);
         }).catch((err) => {
             return res.status(404).json({ "status": "User not found" });

@@ -50,7 +50,7 @@ router.get("/item/:id", VerifyToken, (req, res, next) => {
  */
 router.put("/item/:id", VerifyToken, (req, res, next) => {
     ItemModel.findOneAndUpdate(
-        { _id: req.params.id }, req.body, { new: true }).then(doc => {
+        { _id: req.params.id }, req.body, { new: true }).then((doc) => {
             return res.status(200).json(doc);
         }).catch((err) => {
             return res.status(404).json({ "status": "Item not found" });

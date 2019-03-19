@@ -3,7 +3,7 @@ const app = require("../app");
 var jwt = require("jsonwebtoken");
 const config = require("../src/auth/config");
 const UserModel = require("../src/database/models/user.model");
-var ValidateToken = require("../src/auth/verifytoken");
+var validateToken = require("../src/auth/verifytoken");
 
 var gUser;
 var password = "falsepassword";
@@ -126,7 +126,7 @@ describe("Find a non existing user", () => {
         };
         var req = {};
         req.headers = { "x-access-token": token };
-        var result = ValidateToken(req, res, () => { });
+        var result = validateToken(req, res, () => { });
         expect(result).toBeUndefined();
         done();
     });
@@ -134,7 +134,6 @@ describe("Find a non existing user", () => {
 
 afterAll(async (done) => {
     await UserModel.findOneAndDelete({ username: gUser }).then((res) => {
-        console.log("Cleaned up resources created while testing user end points");
         done();
     });
 });

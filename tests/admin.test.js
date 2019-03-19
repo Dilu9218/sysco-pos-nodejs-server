@@ -25,7 +25,7 @@ beforeAll(async (done) => {
     gUser = generateUserName();
     let testUser = new AdminModel({
         username: gUser, password: bcrypt.hashSync("falsepassword0", 10), isAdmin: false
-    })
+    });
     let adminUser = new AdminModel({
         username: generateUserName(), password: bcrypt.hashSync("falsepassword1", 10), isAdmin: true
     });
@@ -54,7 +54,7 @@ beforeAll(async (done) => {
 
 describe("Admin adds a new user", function () {
 
-    var user = undefined;
+    var user;
 
     beforeAll(() => {
         user = generateUserName();
@@ -142,7 +142,7 @@ describe("Admin adds a new user", function () {
     });
 
     afterAll(async (done) => {
-        await AdminModel.findOneAndDelete({ username: user }).then(res => {
+        await AdminModel.findOneAndDelete({ username: user }).then((res) => {
             done();
         });
     });
@@ -275,7 +275,7 @@ describe("Admin deletes a user", function () {
         return request(app)
             .delete(`/api/admin/user/${tUserID}`)
             .set("x-access-token", gAdminToken)
-            .expect(200).then(r => {
+            .expect(200).then((r) => {
                 expect(String.valueOf(r.body._id)).toBe(String.valueOf(tUserID));
             });
     });

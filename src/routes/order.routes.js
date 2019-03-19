@@ -11,7 +11,7 @@ var OrderModel = require("../database/models/order.model");
 router.get("/list", VerifyToken, (req, res, next) => {
     // Each order will have userID as it"s cart ID
     OrderModel.find({ cartID: req._id }).then((docs) => {
-        if (docs.length === 0) throw new Error("No orders found for this user");
+        if (docs.length === 0) { throw new Error("No orders found for this user"); }
         return res.status(200).json(docs);
     }).catch((err) => {
         return res.status(404).json({ error: "No orders found for this user" });
@@ -67,7 +67,7 @@ router.put("/items/:id", VerifyToken, (req, res, next) => {
         return res.status(400).json({ "status": "No items to add to this order" });
     } else {
         let itemPromises = [];
-        Object.keys(req.body.items).forEach(productID => {
+        Object.keys(req.body.items).forEach((productID) => {
             itemPromises.push(new Promise((resolve, reject) => {
                 ItemModel.findOneAndUpdate(
                     { productID },
@@ -90,9 +90,9 @@ router.put("/items/:id", VerifyToken, (req, res, next) => {
             }));
         });
         let errCount = 0;
-        let error = undefined;
+        let error;
         Promise.all(
-            itemPromises.map((p) => p.catch(e => { errCount++; error = e; }))
+            itemPromises.map((p) => p.catch((e) => { errCount++; error = e; }))
         ).then((r) => {
             if (errCount > 0) {
                 res.status(error["error"]).end();
@@ -128,7 +128,7 @@ router.patch("/item/:id", VerifyToken, (req, res, next) => {
 router.get("/order/:id", VerifyToken, (req, res, next) => {
     OrderModel
         .findOne({ _id: req.params.id })
-        .then(doc => {
+        .then((doc) => {
             res.status(200).json(doc);
         })
         .catch((err) => {
@@ -175,7 +175,7 @@ router.patch("/order/:id", VerifyToken, (req, res, next) => {
                     return res.status(200).json(updatedOrder);
                 }).catch((err) => {
                     return res.status(405).json({ "error": "Cannot find such order" });
-                })
+                });
         }).catch((err) => {
             return res.status(404).json({ "error": "Item not found" });
         });

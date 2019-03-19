@@ -12,10 +12,10 @@ var UserModel = require("../database/models/user.model");
  */
 router.post("/register", function (req, res) {
     if (req.body.username && req.body.password) {
-        var pwd_hashed = bcrypt.hashSync(req.body.password, 10);
+        var pwdHashed = bcrypt.hashSync(req.body.password, 10);
         let u = new UserModel({
             username: req.body.username,
-            password: pwd_hashed,
+            password: pwdHashed,
             isAdmin: false
         });
         u.save().then((savedUser) => {
@@ -44,7 +44,10 @@ router.post("/login", function (req, res) {
             var token = jwt.sign({ id: user._id }, config.secret, {
                 expiresIn: (30 * 24 * 60 * 60)
             });
-            return res.status(200).json({ "status": "Logged in successfully", token: token });
+            return res.status(200).json({
+                status: "Logged in successfully",
+                token: token
+            });
         });
     } else {
         res.status(406).json({ "error": "User data missing" });

@@ -76,9 +76,8 @@ beforeAll(async (done) => {
         nToken = jwt.sign({ id: users[1]._id }, config.secret, {
             expiresIn: (24 * 60 * 60)
         });
-        testingItem.save().then(itm => {
+        testingItem.save().then((itm) => {
             gItemID = itm._id;
-            console.debug("Done creating a test user for orders. Proceed with testing");
             done();
         });
     });
@@ -221,7 +220,6 @@ describe("Fetching the item list", function () {
             .get("/api/item/list")
             .set("x-access-token", gToken)
             .expect(200).then((d) => {
-                gItemList = d;
                 expect(d.body.length).toBeGreaterThan(1);
                 done();
             });
@@ -262,7 +260,7 @@ describe("Creates an order", function () {
 
 describe("Fetches an order", function () {
 
-    let localOrderID = undefined;
+    let localOrderID;
 
     beforeAll(async (done) => {
         let tempOrder = new OrderModel({
@@ -371,7 +369,7 @@ describe("User fetches a list of items", function () {
 
 describe("Fetches orders related to a user", function () {
 
-    let lOrderID = undefined;
+    let lOrderID;
 
     beforeAll(async (done) => {
         let testItem1 = new ItemModel({
@@ -555,8 +553,8 @@ describe("Checkouts an order", function () {
 });
 
 describe("Deleting an order", function () {
-    let orderID = undefined;
-    let emptyItemOrderID = undefined;
+    let orderID;
+    let emptyItemOrderID;
 
     beforeAll(async (done) => {
         let testItem1 = new ItemModel({
@@ -743,11 +741,10 @@ describe("Removing an item from an order", function () {
         await OrderModel.findOneAndDelete({ cartID: "ThisIsANewCart" }).then((res) => {
             ItemModel.deleteOne({ productID: "OR-DER-IT1" }).then((doc) => {
                 ItemModel.deleteOne({ productID: "OR-DER-IT2" }).then((doc) => {
-                    console.log("Deleted test items created for deleting items in an order");
                     done();
                 });
             });
-        })
+        });
     });
 });
 
@@ -981,12 +978,11 @@ describe("Adds multiple items to an order", function () {
             ItemModel.findOneAndDelete({ productID: "MU-LTI-PL2" }).then((res) => {
                 ItemModel.findOneAndDelete({ productID: "MU-LTI-PL3" }).then((res) => {
                     OrderModel.findOneAndDelete({ cartID: "CartForMultipleItems" }).then((res) => {
-                        console.log("Cleaned up resources used while testing multiple item addition");
                         done();
-                    })
-                })
-            })
-        })
+                    });
+                });
+            });
+        });
     });
 });
 
@@ -994,7 +990,6 @@ afterAll(async (done) => {
     await UserModel.findByIdAndDelete(gUserID).then((res) => {
         ItemModel.findOneAndDelete(
             { productID: "TH-ISI-STS" }).then((res) => {
-                console.log("Cleaned up resources used while testing order end points");
                 done();
             });
     });
