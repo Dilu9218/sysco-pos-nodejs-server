@@ -133,7 +133,7 @@ describe("Find a non existing user", () => {
 });
 
 afterAll(async (done) => {
-    await UserModel.findOneAndDelete({ username: gUser }).then(res => {
+    await UserModel.findOneAndDelete({ username: gUser }).then((res) => {
         console.log("Cleaned up resources created while testing user end points");
         done();
     });

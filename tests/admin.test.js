@@ -35,7 +35,7 @@ beforeAll(async (done) => {
     let deletableUser = new AdminModel({
         username: "deletableUser", password: "falsepassword", isAdmin: false
     });
-    await AdminModel.insertMany([testUser, adminUser, normalUser, deletableUser]).then(savedUsers => {
+    await AdminModel.insertMany([testUser, adminUser, normalUser, deletableUser]).then((savedUsers) => {
         // Sign users and save tokens
         console.debug(`Admin is ${savedUsers[1].username} with ${savedUsers[1]._id}\nNormal user is ${savedUsers[2].username}\nTest user is ${savedUsers[0].username}`);
         gAdminToken = jwt.sign({ id: savedUsers[1]._id }, config.secret, {
@@ -174,7 +174,7 @@ describe("Admin lists out all the users", function () {
         await request(app)
             .get("/api/admin/users")
             .set("x-access-token", gAdminToken)
-            .expect(200).then(r => {
+            .expect(200).then((r) => {
                 expect(r.body.length).toBeGreaterThanOrEqual(4);
                 done();
             });
@@ -192,7 +192,7 @@ describe("Admin fetches a user", function () {
         request(app)
             .get(`/api/admin/user/${gid}`)
             .set("x-access-token", gAdminToken)
-            .expect(200).then(res => {
+            .expect(200).then((res) => {
                 expect(res.body[0].username).toBe(gUser);
                 done();
             });
@@ -292,7 +292,7 @@ describe("Admin deletes a user", function () {
 
 afterAll(async (done) => {
     let testUsers = [adminID, tNormalID, gid, tUserID];
-    await AdminModel.deleteMany({ _id: { $in: testUsers } }).then(docs => {
+    await AdminModel.deleteMany({ _id: { $in: testUsers } }).then((docs) => {
         console.log(`Cleared ${docs.n} test users created for testing`);
         done();
     })

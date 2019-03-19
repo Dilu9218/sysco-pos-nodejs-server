@@ -6,41 +6,45 @@ const ItemModel = require("../src/database/models/item.model");
 const OrderModel = require("../src/database/models/order.model");
 const UserModel = require("../src/database/models/user.model");
 
-var gToken = undefined;
-var nToken = undefined;
-var gUser = undefined;
-var gUserID = undefined;
-var gItemID = undefined;
-var gOrderID = undefined;
-var lOrderID = undefined;
+var gToken;
+var nToken;
+var gUser;
+var gUserID;
+var gItemID;
+var lOrderID;
 
 function generateDescription() {
     var text = "";
     var possible = "ABC DEFGH IJKL MNOPQRST U VWXYZabcde fghijklmnopq rstu vwxy z";
-    for (var i = 0; i < 80; i++)
+    for (var i = 0; i < 80; i++) {
         text += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
     return text;
 }
 
 function generateUserName() {
     var text = "";
     var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    for (var i = 0; i < 8; i++)
+    for (var i = 0; i < 8; i++) {
         text += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
     return text;
 }
 
 function generateItemCode() {
     var text = "";
     var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    for (var i = 0; i < 2; i++)
+    for (var i = 0; i < 2; i++) {
         text += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
     text += "-";
-    for (var i = 0; i < 3; i++)
+    for (var j = 0; j < 3; j++) {
         text += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
     text += "-";
-    for (var i = 0; i < 3; i++)
+    for (var k = 0; k < 3; k++) {
         text += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
     return text.toUpperCase();
 }
 
@@ -64,7 +68,7 @@ beforeAll(async (done) => {
         "description": "This is a test item generated for testing",
         "price": 1000.00
     });
-    await UserModel.insertMany([orderingUser, noorderingUser]).then(users => {
+    await UserModel.insertMany([orderingUser, noorderingUser]).then((users) => {
         gUserID = users[0]._id;
         gToken = jwt.sign({ id: users[0]._id }, config.secret, {
             expiresIn: (24 * 60 * 60)
@@ -95,7 +99,7 @@ describe("Adding new items to database", function () {
                 "description": generateDescription(),
                 "price": parseInt(Math.random() * 1000) / 100
             })
-            .expect(200).then(res => {
+            .expect(200).then((res) => {
                 testItemAdded = res.body.id;
                 done();
             });
@@ -134,13 +138,13 @@ describe("Adding new items to database", function () {
                 "productTitle": generateUserName(),
                 "quantity": "Invalid",
                 "description": generateDescription(),
-                "price": parseInt(Math.random() * 1000) / 100
+                "price": parseInt(Math.random() * 1000, 10) / 100
             })
             .expect(400, done);
     });
 
     afterAll(async (done) => {
-        ItemModel.findByIdAndDelete(testItemAdded).then(res => {
+        ItemModel.findByIdAndDelete(testItemAdded).then((res) => {
             done();
         });
     })
@@ -152,7 +156,7 @@ describe("Fetching an item", function () {
         request(app)
             .get(`/api/item/item/${gItemID}`)
             .set("x-access-token", gToken)
-            .expect(200).then(d => {
+            .expect(200).then((d) => {
                 expect(d.body.productID).toBe("TH-ISI-STS");
                 done();
             });
@@ -185,7 +189,7 @@ describe("Updating an item", function () {
             .send({
                 quantity: 500
             })
-            .expect(200).then(d => {
+            .expect(200).then((d) => {
                 expect(d.body.quantity).toBe(500);
                 expect(d.body.price).toBe(1000);
                 done();
@@ -216,7 +220,7 @@ describe("Fetching the item list", function () {
         request(app)
             .get("/api/item/list")
             .set("x-access-token", gToken)
-            .expect(200).then(d => {
+            .expect(200).then((d) => {
                 gItemList = d;
                 expect(d.body.length).toBeGreaterThan(1);
                 done();
@@ -241,7 +245,7 @@ describe("Creates an order", function () {
         request(app)
             .post("/api/order/order")
             .set("x-access-token", gToken)
-            .expect(200).then(r => {
+            .expect(200).then((r) => {
                 gOrderID = r.body._id;
                 done();
             });
@@ -268,17 +272,17 @@ describe("Fetches an order", function () {
             cartID: "DummyCart",
             items: []
         });
-        await tempOrder.save().then(res => {
+        await tempOrder.save().then((res) => {
             localOrderID = res._id;
             done();
-        })
-    })
+        });
+    });
 
     it("Fetches an order with proper authorization", function (done) {
         request(app)
             .get(`/api/order/order/${localOrderID}`)
             .set("x-access-token", gToken)
-            .expect(200).then(r => {
+            .expect(200).then((r) => {
                 expect(r.body.cartID).toBe("DummyCart");
                 done();
             });
@@ -302,7 +306,7 @@ describe("Fetches an order", function () {
     });
 
     afterAll(async (done) => {
-        OrderModel.findByIdAndDelete(localOrderID).then(res => {
+        OrderModel.findByIdAndDelete(localOrderID).then((res) => {
             done();
         });
     });
@@ -330,8 +334,8 @@ describe("User fetches a list of items", function () {
             cartID: gUserID,
             items: itemz
         });
-        await ItemModel.insertMany(itemz).then(docs => {
-            testOrder.save().then(doc => {
+        await ItemModel.insertMany(itemz).then((docs) => {
+            testOrder.save().then((doc) => {
                 lOrderID = doc._id;
                 done();
             });
@@ -342,7 +346,7 @@ describe("User fetches a list of items", function () {
         request(app)
             .get("/api/item/list")
             .set("x-access-token", gToken)
-            .expect(200).then(res => {
+            .expect(200).then((res) => {
                 expect(res.body.length).toBeGreaterThanOrEqual(2);
                 done();
             });
@@ -360,8 +364,8 @@ describe("User fetches a list of items", function () {
     });
 
     afterAll(async (done) => {
-        await ItemModel.findOneAndDelete({ productID: "CC-FIR-ST1" }).then(res => {
-            ItemModel.findOneAndDelete({ productID: "DD-SEC-OND" }).then(res => {
+        await ItemModel.findOneAndDelete({ productID: "CC-FIR-ST1" }).then((res) => {
+            ItemModel.findOneAndDelete({ productID: "DD-SEC-OND" }).then((res) => {
                 console.log("Deleted test items in orderlist");
                 done();
             });
@@ -393,8 +397,8 @@ describe("Fetches orders related to a user", function () {
             cartID: gUserID,
             items: itemz
         });
-        await ItemModel.insertMany(itemz).then(docs => {
-            testOrder.save().then(doc => {
+        await ItemModel.insertMany(itemz).then((docs) => {
+            testOrder.save().then((doc) => {
                 lOrderID = doc._id;
                 done();
             });
@@ -405,7 +409,7 @@ describe("Fetches orders related to a user", function () {
         request(app)
             .get("/api/order/list")
             .set("x-access-token", gToken)
-            .expect(200).then(res => {
+            .expect(200).then((res) => {
                 console.log(res.body);
                 expect(res.body.length).toBeGreaterThanOrEqual(2);
                 done();
@@ -430,9 +434,9 @@ describe("Fetches orders related to a user", function () {
     });
 
     afterAll(async (done) => {
-        await ItemModel.findOneAndDelete({ productID: "CC-FIR-STA" }).then(res => {
-            ItemModel.findOneAndDelete({ productID: "DD-SEC-ONA" }).then(res => {
-                OrderModel.findByIdAndDelete(lOrderID).then(res => {
+        await ItemModel.findOneAndDelete({ productID: "CC-FIR-STA" }).then((res) => {
+            ItemModel.findOneAndDelete({ productID: "DD-SEC-ONA" }).then((res) => {
+                OrderModel.findByIdAndDelete(lOrderID).then((res) => {
                     console.log("Deleted test items and orders fetching orders");
                     done();
                 });
@@ -452,7 +456,7 @@ describe("Adds item to an order", function () {
             price: 250.00
         });
         // Save the test item
-        await testItem.save().then(doc => {
+        await testItem.save().then((doc) => {
             done();
         });
     });
@@ -484,8 +488,8 @@ describe("Adds item to an order", function () {
                 productID: "NE-WPOS-TME",
                 quantity: 10
             })
-            .expect(200).then(res => {
-                ItemModel.findOne({ productID: "NE-WPOS-TME" }).then(doc => {
+            .expect(200).then((res) => {
+                ItemModel.findOne({ productID: "NE-WPOS-TME" }).then((doc) => {
                     expect(doc.quantity).toBe(490);
                     done();
                 });
@@ -523,7 +527,7 @@ describe("Adds item to an order", function () {
     });
 
     afterAll(async (done) => {
-        await ItemModel.findOneAndDelete({ productID: "NE-WPOS-TME" }).then(res => {
+        await ItemModel.findOneAndDelete({ productID: "NE-WPOS-TME" }).then((res) => {
             done();
         })
     });
@@ -599,8 +603,8 @@ describe("Deleting an order", function () {
             cartID: "ThisOrderHasNoItems",
             items: []
         });
-        await ItemModel.insertMany([testItem1, testItem2]).then(docs => {
-            OrderModel.insertMany([testOrder, testOrderWithNoItems]).then(doc => {
+        await ItemModel.insertMany([testItem1, testItem2]).then((docs) => {
+            OrderModel.insertMany([testOrder, testOrderWithNoItems]).then((doc) => {
                 orderID = doc[0]._id;
                 emptyItemOrderID = doc[1]._id;
                 done();
@@ -629,9 +633,9 @@ describe("Deleting an order", function () {
         request(app)
             .delete(`/api/order/order/${orderID}`)
             .set("x-access-token", gToken)
-            .expect(200).then(res => {
-                ItemModel.findOne({ productID: "TH-ENE-W01" }).then(doc1 => {
-                    ItemModel.findOne({ productID: "TH-ENE-W02" }).then(doc2 => {
+            .expect(200).then((res) => {
+                ItemModel.findOne({ productID: "TH-ENE-W01" }).then((doc1) => {
+                    ItemModel.findOne({ productID: "TH-ENE-W02" }).then((doc2) => {
                         expect(doc1.quantity).toBe(500);
                         expect(doc2.description).toBe("This item has 1567 at the beginning");
                         expect(doc2.quantity).toBe(2000);
@@ -648,9 +652,9 @@ describe("Deleting an order", function () {
     });
 
     afterAll(async (done) => {
-        await OrderModel.findOneAndDelete({ cartID: "ThisIsTheTestCartID" }).then(res => {
-            ItemModel.deleteOne({ productID: "TH-ENE-W01" }).then(doc => {
-                ItemModel.deleteOne({ productID: "TH-ENE-W02" }).then(doc => {
+        await OrderModel.findOneAndDelete({ cartID: "ThisIsTheTestCartID" }).then((res) => {
+            ItemModel.deleteOne({ productID: "TH-ENE-W01" }).then((doc) => {
+                ItemModel.deleteOne({ productID: "TH-ENE-W02" }).then((doc) => {
                     console.log("Deleted test items created for deleting an order");
                     done();
                 });
@@ -697,8 +701,8 @@ describe("Removing an item from an order", function () {
             cartID: "ThisIsANewCart",
             items: [testItem1C, testItem2C]
         });
-        await ItemModel.insertMany([testItem1, testItem2]).then(docs => {
-            testOrder.save().then(doc => {
+        await ItemModel.insertMany([testItem1, testItem2]).then((docs) => {
+            testOrder.save().then((doc) => {
                 orderID = doc._id;
                 done();
             });
@@ -725,15 +729,15 @@ describe("Removing an item from an order", function () {
                 quantity: 25
             })
             .expect(200).then(res => {
-                ItemModel.findOne({ productID: "OR-DER-IT1" }).then(doc1 => {
-                    ItemModel.findOne({ productID: "OR-DER-IT2" }).then(doc2 => {
+                ItemModel.findOne({ productID: "OR-DER-IT1" }).then((doc1) => {
+                    ItemModel.findOne({ productID: "OR-DER-IT2" }).then((doc2) => {
                         expect(doc1.quantity).toBe(275);
                         expect(doc2.quantity).toBe(1000);
                         expect(doc1.description).toBe("This item has 250 items at the beginning");
                         done();
-                    }).catch(err => { done(); });
-                }).catch(err => { done(); });
-            }).catch(err => { done() });
+                    }).catch((err) => { done(); });
+                }).catch((err) => { done(); });
+            }).catch((err) => { done() });
     });
     it("Remove an item from a non existing order with valid authorization", function (done) {
         request(app)
@@ -743,9 +747,9 @@ describe("Removing an item from an order", function () {
     });
 
     afterAll(async (done) => {
-        await OrderModel.findOneAndDelete({ cartID: "ThisIsANewCart" }).then(res => {
-            ItemModel.deleteOne({ productID: "OR-DER-IT1" }).then(doc => {
-                ItemModel.deleteOne({ productID: "OR-DER-IT2" }).then(doc => {
+        await OrderModel.findOneAndDelete({ cartID: "ThisIsANewCart" }).then((res) => {
+            ItemModel.deleteOne({ productID: "OR-DER-IT1" }).then((doc) => {
+                ItemModel.deleteOne({ productID: "OR-DER-IT2" }).then((doc) => {
                     console.log("Deleted test items created for deleting items in an order");
                     done();
                 });
@@ -792,8 +796,8 @@ describe("Changing an item in an order", function () {
             cartID: "ThisIsAnotherNewCart",
             items: [testItem1C, testItem2C]
         });
-        await ItemModel.insertMany([testItem1, testItem2]).then(docs => {
-            testOrder.save().then(doc => {
+        await ItemModel.insertMany([testItem1, testItem2]).then((docs) => {
+            testOrder.save().then((doc) => {
                 orderID = doc._id;
                 done();
             });
@@ -820,9 +824,9 @@ describe("Changing an item in an order", function () {
                 quantity: 30,
                 difference: 5
             })
-            .expect(200).then(res => {
-                ItemModel.findOne({ productID: "OR-DER-111" }).then(doc1 => {
-                    ItemModel.findOne({ productID: "OR-DER-222" }).then(doc2 => {
+            .expect(200).then((res) => {
+                ItemModel.findOne({ productID: "OR-DER-111" }).then((doc1) => {
+                    ItemModel.findOne({ productID: "OR-DER-222" }).then((doc2) => {
                         expect(doc1.quantity).toBe(245);
                         expect(doc2.quantity).toBe(1000);
                         expect(doc1.description).toBe("This item has 250 items at the beginning");
@@ -855,9 +859,9 @@ describe("Changing an item in an order", function () {
     });
 
     afterAll(async (done) => {
-        await OrderModel.findOneAndDelete({ cartID: "ThisIsAnotherNewCart" }).then(res => {
-            ItemModel.deleteOne({ productID: "OR-DER-111" }).then(doc => {
-                ItemModel.deleteOne({ productID: "OR-DER-222" }).then(doc => {
+        await OrderModel.findOneAndDelete({ cartID: "ThisIsAnotherNewCart" }).then((res) => {
+            ItemModel.deleteOne({ productID: "OR-DER-111" }).then((doc) => {
+                ItemModel.deleteOne({ productID: "OR-DER-222" }).then((doc) => {
                     console.log("Deleted test items created for deleting items in an order");
                     done();
                 });
@@ -897,8 +901,8 @@ describe("Adds multiple items to an order", function () {
             items: []
         })
         // Save the test item
-        await ItemModel.insertMany([testItem1, testItem2, testItem3]).then(docs => {
-            testOrder.save().then(doc => {
+        await ItemModel.insertMany([testItem1, testItem2, testItem3]).then((docs) => {
+            testOrder.save().then((doc) => {
                 console.debug("Created test items to test multiple item additions");
                 localOrderID = doc._id;
                 done();
@@ -917,10 +921,10 @@ describe("Adds multiple items to an order", function () {
                     "MU-LTI-PL3": 230
                 }
             })
-            .expect(200).then(res => {
-                ItemModel.findOne({ productID: "MU-LTI-PL1" }).then(i1 => {
-                    ItemModel.findOne({ productID: "MU-LTI-PL2" }).then(i2 => {
-                        ItemModel.findOne({ productID: "MU-LTI-PL3" }).then(i3 => {
+            .expect(200).then((res) => {
+                ItemModel.findOne({ productID: "MU-LTI-PL1" }).then((i1) => {
+                    ItemModel.findOne({ productID: "MU-LTI-PL2" }).then((i2) => {
+                        ItemModel.findOne({ productID: "MU-LTI-PL3" }).then((i3) => {
                             expect(i1.quantity).toBe(480);
                             expect(i2.quantity).toBe(385);
                             expect(i3.quantity).toBe(470);
@@ -967,8 +971,8 @@ describe("Adds multiple items to an order", function () {
                     "MU-LTI-PL3": 230
                 }
             })
-            .expect(404).then(res => {
-                ItemModel.findOne({ productID: "MU-LTI-PL2" }).then(i2 => {
+            .expect(404).then((res) => {
+                ItemModel.findOne({ productID: "MU-LTI-PL2" }).then((i2) => {
                     expect(i2.quantity).toBe(355);
                     done();
                 });
@@ -982,10 +986,10 @@ describe("Adds multiple items to an order", function () {
     });
 
     afterAll(async (done) => {
-        await ItemModel.findOneAndDelete({ productID: "MU-LTI-PL1" }).then(res => {
-            ItemModel.findOneAndDelete({ productID: "MU-LTI-PL2" }).then(res => {
-                ItemModel.findOneAndDelete({ productID: "MU-LTI-PL3" }).then(res => {
-                    OrderModel.findOneAndDelete({ cartID: "CartForMultipleItems" }).then(res => {
+        await ItemModel.findOneAndDelete({ productID: "MU-LTI-PL1" }).then((res) => {
+            ItemModel.findOneAndDelete({ productID: "MU-LTI-PL2" }).then((res) => {
+                ItemModel.findOneAndDelete({ productID: "MU-LTI-PL3" }).then((res) => {
+                    OrderModel.findOneAndDelete({ cartID: "CartForMultipleItems" }).then((res) => {
                         console.log("Cleaned up resources used while testing multiple item addition");
                         done();
                     })
@@ -996,9 +1000,9 @@ describe("Adds multiple items to an order", function () {
 });
 
 afterAll(async (done) => {
-    await UserModel.findByIdAndDelete(gUserID).then(res => {
+    await UserModel.findByIdAndDelete(gUserID).then((res) => {
         ItemModel.findOneAndDelete(
-            { productID: "TH-ISI-STS" }).then(res => {
+            { productID: "TH-ISI-STS" }).then((res) => {
                 console.log("Cleaned up resources used while testing order end points");
                 done();
             });

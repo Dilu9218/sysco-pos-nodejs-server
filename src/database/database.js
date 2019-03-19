@@ -18,8 +18,7 @@ class Database {
                 });
         } catch (e) {
             /* istanbul ignore next */
-            console.log("Hello, Database is not defined. Try the following command in console: \
-            export DATABASE_URL=mongodb://localhost:27017/posdb");
+            console.log("Hello, Database is not defined. Try the following command in console: export DATABASE_URL=mongodb://localhost:27017/posdb");
         }
     }
 }
