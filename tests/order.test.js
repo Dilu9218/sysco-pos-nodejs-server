@@ -86,7 +86,7 @@ beforeAll(async (done) => {
 
 describe("Adding new items to database", function () {
 
-    let testItemAdded = undefined;
+    let testItemAdded;
 
     it("Adds an item with proper authorization", function (done) {
         request(app)
@@ -245,10 +245,7 @@ describe("Creates an order", function () {
         request(app)
             .post("/api/order/order")
             .set("x-access-token", gToken)
-            .expect(200).then((r) => {
-                gOrderID = r.body._id;
-                done();
-            });
+            .expect(200, done);
     });
     it("Creates an order without authorization", function (done) {
         request(app)
@@ -366,7 +363,6 @@ describe("User fetches a list of items", function () {
     afterAll(async (done) => {
         await ItemModel.findOneAndDelete({ productID: "CC-FIR-ST1" }).then((res) => {
             ItemModel.findOneAndDelete({ productID: "DD-SEC-OND" }).then((res) => {
-                console.log("Deleted test items in orderlist");
                 done();
             });
         });
@@ -410,7 +406,6 @@ describe("Fetches orders related to a user", function () {
             .get("/api/order/list")
             .set("x-access-token", gToken)
             .expect(200).then((res) => {
-                console.log(res.body);
                 expect(res.body.length).toBeGreaterThanOrEqual(2);
                 done();
             });
@@ -437,7 +432,6 @@ describe("Fetches orders related to a user", function () {
         await ItemModel.findOneAndDelete({ productID: "CC-FIR-STA" }).then((res) => {
             ItemModel.findOneAndDelete({ productID: "DD-SEC-ONA" }).then((res) => {
                 OrderModel.findByIdAndDelete(lOrderID).then((res) => {
-                    console.log("Deleted test items and orders fetching orders");
                     done();
                 });
             });
@@ -655,7 +649,6 @@ describe("Deleting an order", function () {
         await OrderModel.findOneAndDelete({ cartID: "ThisIsTheTestCartID" }).then((res) => {
             ItemModel.deleteOne({ productID: "TH-ENE-W01" }).then((doc) => {
                 ItemModel.deleteOne({ productID: "TH-ENE-W02" }).then((doc) => {
-                    console.log("Deleted test items created for deleting an order");
                     done();
                 });
             });
@@ -728,7 +721,7 @@ describe("Removing an item from an order", function () {
                 productID: "OR-DER-IT1",
                 quantity: 25
             })
-            .expect(200).then(res => {
+            .expect(200).then((res) => {
                 ItemModel.findOne({ productID: "OR-DER-IT1" }).then((doc1) => {
                     ItemModel.findOne({ productID: "OR-DER-IT2" }).then((doc2) => {
                         expect(doc1.quantity).toBe(275);
@@ -737,7 +730,7 @@ describe("Removing an item from an order", function () {
                         done();
                     }).catch((err) => { done(); });
                 }).catch((err) => { done(); });
-            }).catch((err) => { done() });
+            }).catch((err) => { done(); });
     });
     it("Remove an item from a non existing order with valid authorization", function (done) {
         request(app)
@@ -759,7 +752,7 @@ describe("Removing an item from an order", function () {
 });
 
 describe("Changing an item in an order", function () {
-    let orderID = undefined;
+    let orderID;
 
     beforeAll(async (done) => {
         let testItem1 = new ItemModel({
@@ -862,7 +855,6 @@ describe("Changing an item in an order", function () {
         await OrderModel.findOneAndDelete({ cartID: "ThisIsAnotherNewCart" }).then((res) => {
             ItemModel.deleteOne({ productID: "OR-DER-111" }).then((doc) => {
                 ItemModel.deleteOne({ productID: "OR-DER-222" }).then((doc) => {
-                    console.log("Deleted test items created for deleting items in an order");
                     done();
                 });
             });
@@ -872,7 +864,7 @@ describe("Changing an item in an order", function () {
 
 describe("Adds multiple items to an order", function () {
 
-    let localOrderID = undefined;
+    let localOrderID;
 
     beforeAll(async (done) => {
         let testItem1 = new ItemModel({
@@ -903,7 +895,6 @@ describe("Adds multiple items to an order", function () {
         // Save the test item
         await ItemModel.insertMany([testItem1, testItem2, testItem3]).then((docs) => {
             testOrder.save().then((doc) => {
-                console.debug("Created test items to test multiple item additions");
                 localOrderID = doc._id;
                 done();
             });

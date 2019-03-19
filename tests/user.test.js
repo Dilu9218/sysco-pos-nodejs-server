@@ -5,15 +5,15 @@ const config = require("../src/auth/config");
 const UserModel = require("../src/database/models/user.model");
 var ValidateToken = require("../src/auth/verifytoken");
 
-var ltoken = undefined;
-var gUser = undefined;
+var gUser;
 var password = "falsepassword";
 
 function generateUserName() {
     var text = "";
     var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    for (var i = 0; i < 8; i++)
+    for (var i = 0; i < 8; i++) {
         text += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
     return text;
 }
 
@@ -85,8 +85,8 @@ describe("User tries to log in", function () {
                 username: gUser,
                 password
             })
-            .expect(200).then(r => {
-                ltoken = r.body.token;
+            .expect(200).then((r) => {
+                expect(r).toBeDefined();
             });
     });
     it("Logs in with no password", function (done) {
@@ -122,12 +122,12 @@ describe("Find a non existing user", () => {
             expiresIn: (30 * 24 * 60 * 60)
         });
         var res = {
-            status(n) { return { send(N) { return n + N; } } },
+            status(n) { return { send(N) { return n + N; } }; },
         };
         var req = {};
         req.headers = { "x-access-token": token };
         var result = ValidateToken(req, res, () => { });
-        expect(result).toBe(undefined);
+        expect(result).toBeUndefined();
         done();
     });
 });

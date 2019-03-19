@@ -5,10 +5,10 @@ const app = require("../app");
 var config = require("../src/auth/config");
 const AdminModel = require("../src/database/models/user.model");
 
-var gid = undefined;
-var gUser = undefined;
-var gAdminToken = undefined;
-var gUserToken = undefined;
+var gid;
+var gUser;
+var gAdminToken;
+var gUserToken;
 var adminID, tUserID, tNormalID;
 
 function generateUserName() {
@@ -37,7 +37,6 @@ beforeAll(async (done) => {
     });
     await AdminModel.insertMany([testUser, adminUser, normalUser, deletableUser]).then((savedUsers) => {
         // Sign users and save tokens
-        console.debug(`Admin is ${savedUsers[1].username} with ${savedUsers[1]._id}\nNormal user is ${savedUsers[2].username}\nTest user is ${savedUsers[0].username}`);
         gAdminToken = jwt.sign({ id: savedUsers[1]._id }, config.secret, {
             expiresIn: (24 * 60 * 60)
         });
@@ -59,7 +58,6 @@ describe("Admin adds a new user", function () {
 
     beforeAll(() => {
         user = generateUserName();
-        console.debug(`User in testing will be created as ${user}`);
     });
 
     it("Request to add a user without authorization", function (done) {
@@ -145,7 +143,6 @@ describe("Admin adds a new user", function () {
 
     afterAll(async (done) => {
         await AdminModel.findOneAndDelete({ username: user }).then(res => {
-            console.log("Deleted user in testing");
             done();
         });
     });
@@ -213,7 +210,7 @@ describe("Admin fetches a user", function () {
 
 describe("Admin updates a user", function () {
 
-    var newuser = undefined;
+    var newuser;
 
     beforeAll(() => {
         newuser = generateUserName();
@@ -293,7 +290,6 @@ describe("Admin deletes a user", function () {
 afterAll(async (done) => {
     let testUsers = [adminID, tNormalID, gid, tUserID];
     await AdminModel.deleteMany({ _id: { $in: testUsers } }).then((docs) => {
-        console.log(`Cleared ${docs.n} test users created for testing`);
         done();
-    })
-})
+    });
+});

@@ -25,7 +25,7 @@ router.post("/new", VerifyToken, (req, res, next) => {
     o.save().then((doc) => {
         res.status(200).json({ id: doc._id });
     }).catch((err) => {
-        res.status(400).send(er);
+        res.status(400).send(err);
     });
 });
 
