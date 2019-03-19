@@ -1,9 +1,9 @@
-const request = require('supertest');
-var jwt = require('jsonwebtoken');
-var bcrypt = require('bcryptjs');
-const app = require('../app');
-var config = require('../src/auth/config');
-const AdminModel = require('../src/database/models/user.model');
+const request = require("supertest");
+var jwt = require("jsonwebtoken");
+var bcrypt = require("bcryptjs");
+const app = require("../app");
+var config = require("../src/auth/config");
+const AdminModel = require("../src/database/models/user.model");
 
 var gid = undefined;
 var gUser = undefined;
@@ -46,14 +46,14 @@ beforeAll(async (done) => {
             expiresIn: (24 * 60 * 60)
         });
         tNormalID = savedUsers[2]._id;
-        // Global user ID needed for testing would be this user's
+        // Global user ID needed for testing would be this user"s
         gid = savedUsers[0]._id;
         tUserID = savedUsers[3]._id;
         done();
     });
 });
 
-describe('Admin adds a new user', function () {
+describe("Admin adds a new user", function () {
 
     var user = undefined;
 
@@ -62,9 +62,9 @@ describe('Admin adds a new user', function () {
         console.debug(`User in testing will be created as ${user}`);
     });
 
-    it('Request to add a user without authorization', function (done) {
+    it("Request to add a user without authorization", function (done) {
         request(app)
-            .post('/api/admin/user/add')
+            .post("/api/admin/user/add")
             .send({
                 username: generateUserName(),
                 password: "abc123",
@@ -72,47 +72,47 @@ describe('Admin adds a new user', function () {
             })
             .expect(403, done);
     });
-    it('Request to add a user without any data', function (done) {
+    it("Request to add a user without any data", function (done) {
         request(app)
-            .post('/api/admin/user/add')
-            .set('x-access-token', gAdminToken)
+            .post("/api/admin/user/add")
+            .set("x-access-token", gAdminToken)
             .send({})
             .expect(400, done);
     });
-    it('Request to add a user without username', function (done) {
+    it("Request to add a user without username", function (done) {
         request(app)
-            .post('/api/admin/user/add')
-            .set('x-access-token', gAdminToken)
+            .post("/api/admin/user/add")
+            .set("x-access-token", gAdminToken)
             .send({
                 password: "abc123",
                 isAdmin: false
             })
             .expect(400, done);
     });
-    it('Request to add a user without password', function (done) {
+    it("Request to add a user without password", function (done) {
         request(app)
-            .post('/api/admin/user/add')
-            .set('x-access-token', gAdminToken)
+            .post("/api/admin/user/add")
+            .set("x-access-token", gAdminToken)
             .send({
                 username: user,
                 isAdmin: false
             })
             .expect(400, done);
     });
-    it('Request to add a user without admin status', function (done) {
+    it("Request to add a user without admin status", function (done) {
         request(app)
-            .post('/api/admin/user/add')
-            .set('x-access-token', gAdminToken)
+            .post("/api/admin/user/add")
+            .set("x-access-token", gAdminToken)
             .send({
                 username: user,
                 password: "abc123"
             })
             .expect(400, done);
     });
-    it('Request to add a user with authorization', function (done) {
+    it("Request to add a user with authorization", function (done) {
         request(app)
-            .post('/api/admin/user/add')
-            .set('x-access-token', gAdminToken)
+            .post("/api/admin/user/add")
+            .set("x-access-token", gAdminToken)
             .send({
                 username: user,
                 password: "abc123",
@@ -120,10 +120,10 @@ describe('Admin adds a new user', function () {
             })
             .expect(200, done);
     });
-    it('Request to add a user with invalid role authorization', function (done) {
+    it("Request to add a user with invalid role authorization", function (done) {
         request(app)
-            .post('/api/admin/user/add')
-            .set('x-access-token', gUserToken)
+            .post("/api/admin/user/add")
+            .set("x-access-token", gUserToken)
             .send({
                 username: user,
                 password: "abc123",
@@ -131,10 +131,10 @@ describe('Admin adds a new user', function () {
             })
             .expect(403, done);
     });
-    it('Request to add the same user with authorization', function (done) {
+    it("Request to add the same user with authorization", function (done) {
         request(app)
-            .post('/api/admin/user/add')
-            .set('x-access-token', gAdminToken)
+            .post("/api/admin/user/add")
+            .set("x-access-token", gAdminToken)
             .send({
                 username: user,
                 password: "abc123",
@@ -145,35 +145,35 @@ describe('Admin adds a new user', function () {
 
     afterAll(async (done) => {
         await AdminModel.findOneAndDelete({ username: user }).then(res => {
-            console.log('Deleted user in testing');
+            console.log("Deleted user in testing");
             done();
         });
     });
 });
 
-describe('Admin lists out all the users', function () {
+describe("Admin lists out all the users", function () {
 
-    it('Listing out users without authorization', function (done) {
+    it("Listing out users without authorization", function (done) {
         request(app)
-            .get('/api/admin/users')
+            .get("/api/admin/users")
             .expect(403, done);
     });
-    it('Listing out users with invalid token', function (done) {
+    it("Listing out users with invalid token", function (done) {
         request(app)
-            .get('/api/admin/users')
-            .set('x-access-token', gUserToken + 'z')
+            .get("/api/admin/users")
+            .set("x-access-token", gUserToken + "z")
             .expect(500, done);
     });
-    it('Listing out users with invalid role authorization', function (done) {
+    it("Listing out users with invalid role authorization", function (done) {
         request(app)
-            .get('/api/admin/users')
-            .set('x-access-token', gUserToken)
+            .get("/api/admin/users")
+            .set("x-access-token", gUserToken)
             .expect(403, done);
     });
-    it('Listing out users with correct authorization', async function (done) {
+    it("Listing out users with correct authorization", async function (done) {
         await request(app)
-            .get('/api/admin/users')
-            .set('x-access-token', gAdminToken)
+            .get("/api/admin/users")
+            .set("x-access-token", gAdminToken)
             .expect(200).then(r => {
                 expect(r.body.length).toBeGreaterThanOrEqual(4);
                 done();
@@ -181,37 +181,37 @@ describe('Admin lists out all the users', function () {
     });
 });
 
-describe('Admin fetches a user', function () {
+describe("Admin fetches a user", function () {
 
-    it('Fetching a user without authorization', function (done) {
+    it("Fetching a user without authorization", function (done) {
         request(app)
             .get(`/api/admin/user/${gid}`)
             .expect(403, done);
     });
-    it('Fetching a user with authorization', function (done) {
+    it("Fetching a user with authorization", function (done) {
         request(app)
             .get(`/api/admin/user/${gid}`)
-            .set('x-access-token', gAdminToken)
+            .set("x-access-token", gAdminToken)
             .expect(200).then(res => {
                 expect(res.body[0].username).toBe(gUser);
                 done();
             });
     });
-    it('Fetching a user with invalid role authorization', function (done) {
+    it("Fetching a user with invalid role authorization", function (done) {
         request(app)
             .get(`/api/admin/user/${gid}`)
-            .set('x-access-token', gUserToken)
+            .set("x-access-token", gUserToken)
             .expect(403, done);
     });
-    it('Fetching a user with an invalid ID', function (done) {
+    it("Fetching a user with an invalid ID", function (done) {
         request(app)
             .get(`/api/admin/user/${gid}z`)
-            .set('x-access-token', gAdminToken)
+            .set("x-access-token", gAdminToken)
             .expect(404, done);
     });
 });
 
-describe('Admin updates a user', function () {
+describe("Admin updates a user", function () {
 
     var newuser = undefined;
 
@@ -219,7 +219,7 @@ describe('Admin updates a user', function () {
         newuser = generateUserName();
     });
 
-    it('Updating a user without authorization', function (done) {
+    it("Updating a user without authorization", function (done) {
         request(app)
             .put(`/api/admin/user/${gid}`)
             .send({
@@ -227,10 +227,10 @@ describe('Admin updates a user', function () {
             })
             .expect(403, done);
     });
-    it('Updating a user with authorization', async function (done) {
+    it("Updating a user with authorization", async function (done) {
         await request(app)
             .put(`/api/admin/user/${gid}`)
-            .set('x-access-token', gAdminToken)
+            .set("x-access-token", gAdminToken)
             .send({
                 username: newuser
             })
@@ -241,51 +241,51 @@ describe('Admin updates a user', function () {
                 done();
             });
     });
-    it('Updating a user with invalid role authorization', function (done) {
+    it("Updating a user with invalid role authorization", function (done) {
         request(app)
             .put(`/api/admin/user/${gid}`)
-            .set('x-access-token', gUserToken)
+            .set("x-access-token", gUserToken)
             .send({
                 username: newuser
             })
             .expect(403, done);
     });
-    it('Updating a user with an invalid ID', function (done) {
+    it("Updating a user with an invalid ID", function (done) {
         request(app)
             .put(`/api/admin/user/${gid}z`)
             .send({
                 username: newuser
             })
-            .set('x-access-token', gAdminToken)
+            .set("x-access-token", gAdminToken)
             .expect(404, done);
     });
 });
 
-describe('Admin deletes a user', function () {
+describe("Admin deletes a user", function () {
 
-    it('Deleting a user without authorization', function (done) {
+    it("Deleting a user without authorization", function (done) {
         request(app)
             .delete(`/api/admin/user/${tUserID}`)
             .expect(403, done);
     });
-    it('Deleting a user with invalid role authorization', function (done) {
+    it("Deleting a user with invalid role authorization", function (done) {
         request(app)
             .delete(`/api/admin/user/${tUserID}`)
-            .set('x-access-token', gUserToken)
+            .set("x-access-token", gUserToken)
             .expect(403, done);
     });
-    it('Deleting a user with authorization', function () {
+    it("Deleting a user with authorization", function () {
         return request(app)
             .delete(`/api/admin/user/${tUserID}`)
-            .set('x-access-token', gAdminToken)
+            .set("x-access-token", gAdminToken)
             .expect(200).then(r => {
                 expect(String.valueOf(r.body._id)).toBe(String.valueOf(tUserID));
             });
     });
-    it('Deleting a user with an invalid ID', function (done) {
+    it("Deleting a user with an invalid ID", function (done) {
         request(app)
             .delete(`/api/admin/user/${tUserID}z`)
-            .set('x-access-token', gAdminToken)
+            .set("x-access-token", gAdminToken)
             .expect(404, done);
     });
 });

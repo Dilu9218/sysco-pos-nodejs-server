@@ -1,18 +1,18 @@
-var express = require('express');
+var express = require("express");
 var router = express.Router();
-var VerifyToken = require('../auth/verifytoken');
-var ItemModel = require('../database/models/item.model');
+var VerifyToken = require("../auth/verifytoken");
+var ItemModel = require("../database/models/item.model");
 
 /**
  * Fetches all available items in database
  * @see https://app.swaggerhub.com/apis/CloudyPadmal/Sysco-POS/1.0.0#/item/itemList
  */
-router.get('/list', VerifyToken, (req, res, next) => {
+router.get("/list", VerifyToken, (req, res, next) => {
     ItemModel.find({}).then(docs => {
         return res.status(200).json(docs);
     }).catch(err => {
         /* istanbul ignore next */
-        return res.status(404).json({ 'status': 'No items found' });
+        return res.status(404).json({ "status": "No items found" });
     });
 });
 
@@ -20,7 +20,7 @@ router.get('/list', VerifyToken, (req, res, next) => {
  * Adds a new item to the item collection
  * @see https://app.swaggerhub.com/apis/CloudyPadmal/Sysco-POS/1.0.0#/item/addNewItem
  */
-router.post('/new', VerifyToken, (req, res, next) => {
+router.post("/new", VerifyToken, (req, res, next) => {
     let o = new ItemModel(req.body);
     o.save().then(doc => {
         res.status(200).json({ id: doc._id });
@@ -33,14 +33,14 @@ router.post('/new', VerifyToken, (req, res, next) => {
  * Fetches an item
  * @see https://app.swaggerhub.com/apis/CloudyPadmal/Sysco-POS/1.0.0#/item/fetchItem
  */
-router.get('/item/:id', VerifyToken, (req, res, next) => {
+router.get("/item/:id", VerifyToken, (req, res, next) => {
     ItemModel
         .findOne({ _id: req.params.id })
         .then(doc => {
             res.status(200).json(doc);
         })
         .catch(er => {
-            res.status(404).json({ 'error': 'Cannot find such item' });
+            res.status(404).json({ "error": "Cannot find such item" });
         });
 });
 
@@ -48,12 +48,12 @@ router.get('/item/:id', VerifyToken, (req, res, next) => {
  * Updates an item
  * @see https://app.swaggerhub.com/apis/CloudyPadmal/Sysco-POS/1.0.0#/item/updateItem
  */
-router.put('/item/:id', VerifyToken, (req, res, next) => {
+router.put("/item/:id", VerifyToken, (req, res, next) => {
     ItemModel.findOneAndUpdate(
         { _id: req.params.id }, req.body, { new: true }).then(doc => {
             return res.status(200).json(doc);
         }).catch(er => {
-            return res.status(404).json({ 'status': 'Item not found' });
+            return res.status(404).json({ "status": "Item not found" });
         });
 });
 
