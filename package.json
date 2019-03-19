@@ -23,7 +23,7 @@
   "devDependencies": {},
   "scripts": {
     "test": "jest --detectOpenHandles --verbose --forceExit && codecov",
-    "test-with-coverage": "jest --detectOpenHandles --verbose --coverage && cat ./coverage/lcov.info | codacy-coverage",
+    "test-with-coverage": "jest --detectOpenHandles --verbose --coverage --forceExit && cat ./coverage/lcov.info | codacy-coverage",
     "start": "node server.js",
     "mystart": "nodemon server.js"
   },
