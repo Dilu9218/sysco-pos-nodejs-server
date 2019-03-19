@@ -141,23 +141,22 @@ router.get("/order/:id", VerifyToken, (req, res, next) => {
  * @see https://app.swaggerhub.com/apis/CloudyPadmal/Sysco-POS/1.0.3#/order/delete_this_order
  **************************************************************************************************/
 router.delete("/order/:id", VerifyToken, (req, res, next) => {
-    OrderModel.findOneAndDelete(
-        { _id: req.params.id }).then((doc) => {
-            let itemList = doc.items;
-            // There are items in the order, We need to add them back to global items
-            if (itemList.length > 0) {
-                itemList.forEach((item) => {
-                    ItemModel.findOneAndUpdate({ productID: item.productID },
-                        { $inc: { quantity: item.quantity } }, { new: true })
-                        .then((item) => { });
-                    return res.status(200).json(itemList);
-                });
-            } else {
-                return res.status(200).json(doc);
-            }
-        }).catch((err) => {
-            res.status(404).end();
-        });
+    OrderModel.findByIdAndDelete(req.params.id).then((doc) => {
+        let itemList = doc.items;
+        // There are items in the order, We need to add them back to global items
+        if (itemList.length > 0) {
+            itemList.forEach((item) => {
+                ItemModel.findOneAndUpdate({ productID: item.productID },
+                    { $inc: { quantity: item.quantity } }, { new: true })
+                    .then((item) => { });
+                return res.status(200).json(itemList);
+            });
+        } else {
+            return res.status(200).json(doc);
+        }
+    }).catch((err) => {
+        res.status(404).end();
+    });
 });
 
 /***************************************************************************************************
