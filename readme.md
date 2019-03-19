@@ -1,0 +1,1 @@
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/047d35f7d499401e89fa8d34c6b84dee)](https://www.codacy.com/app/blog.padmal/sysco-pos-nodejs-server?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=CloudyPadmal/sysco-pos-nodejs-server&amp;utm_campaign=Badge_Grade)
