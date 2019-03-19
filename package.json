@@ -20,7 +20,7 @@
   },
   "devDependencies": {},
   "scripts": {
-    "test": "jest --detectOpenHandles --verbose --coverage",
+    "test": "jest --detectOpenHandles --verbose --coverage --forceExit",
     "start": "node server.js",
     "mystart": "nodemon server.js"
   },

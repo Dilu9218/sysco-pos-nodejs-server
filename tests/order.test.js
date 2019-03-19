@@ -122,9 +122,9 @@ describe("Adding new items to database", function () {
             .send({
                 "productID": generateItemCode(),
                 "productTitle": generateUserName(),
-                "quantity": parseInt(Math.random() * 50),
+                "quantity": parseInt(Math.random() * 50, 10),
                 "description": "Random item description without token is here",
-                "price": parseInt(Math.random() * 1000) / 100
+                "price": parseInt(Math.random() * 1000, 10) / 100
             })
             .expect(403, done);
     });
@@ -220,7 +220,7 @@ describe("Fetching the item list", function () {
             .get("/api/item/list")
             .set("x-access-token", gToken)
             .expect(200).then((d) => {
-                expect(d.body.length).toBeGreaterThan(1);
+                expect(d.body.length).toBeGreaterThanOrEqual(1);
                 done();
             });
     });
@@ -377,14 +377,14 @@ describe("Fetches orders related to a user", function () {
             productTitle: "Test Item Three",
             quantity: 50,
             description: "This is the third test item created",
-            price: 89.00
+            price: 89
         });
         let testItem2 = new ItemModel({
             productID: "DD-SEC-ONA",
             productTitle: "Test Item Four",
             quantity: 34,
             description: "This is the fourth test item created",
-            price: 175.50
+            price: 175.5
         });
         var itemz = [testItem1, testItem2];
         let testOrder = new OrderModel({
@@ -655,7 +655,7 @@ describe("Deleting an order", function () {
 });
 
 describe("Removing an item from an order", function () {
-    let orderID = undefined;
+    let orderID;
 
     beforeAll(async (done) => {
         let testItem1 = new ItemModel({
@@ -888,14 +888,14 @@ describe("Adds multiple items to an order", function () {
         let testOrder = new OrderModel({
             cartID: "CartForMultipleItems",
             items: []
-        })
+        });
         // Save the test item
         await ItemModel.insertMany([testItem1, testItem2, testItem3]).then((docs) => {
             testOrder.save().then((doc) => {
                 localOrderID = doc._id;
                 done();
             });
-        })
+        });
     });
 
     it("Adds multiple items with proper authorization", function (done) {

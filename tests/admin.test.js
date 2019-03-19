@@ -231,7 +231,7 @@ describe("Admin updates a user", function () {
             .send({
                 username: newuser
             })
-            .expect(200).then(r => {
+            .expect(200).then((r) => {
                 expect(r.body.username).toBe(newuser);
                 // Updating current global username as it changed after this test
                 gUser = newuser;

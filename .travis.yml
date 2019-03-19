@@ -9,8 +9,7 @@ cache:
     - '$HOME/.npm'
 env:
   global:
-    - NO_UPDATE_NOTIFIER=1
-    - NODE_NO_WARNINGS=1
+    - DATABASE_URL=mongodb://localhost:27017/posdb
 before_install:
   - npm config set loglevel warn
 install: npm ci
@@ -21,3 +20,5 @@ jobs:
   include:
     - stage: Unit and Integration tests
       script: npm test
+after_script:
+  echo 'All done :)'
