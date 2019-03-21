@@ -10,8 +10,8 @@
 
 This repository contains source code related to the back end REST API implemented as one of the requirements in Sysco LABS induction program 2019. Source code is developed using NodeJS using VSCode IDE. There are two branches maintained in this project.
 
-- `development` branch containing source code under development
-- `deployment` hosting branch in Heroku. Pushes to this branch will deploy the content in the hosted API
+  - `development` branch containing source code under development
+  - `deployment` hosting branch in Heroku. Pushes to this branch will deploy the content in the hosted API
 
 ## Getting Started
 
@@ -21,15 +21,15 @@ These instructions will get you a copy of the project up and running on your loc
 
 What things you need to install the software and how to install them
 
-- [VSCode](https://code.visualstudio.com/download)
-- [MongoDB](https://docs.mongodb.com/manual/installation/)
-- [NodeJS & npm](https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-ubuntu-18-04)
+  - [VSCode](https://code.visualstudio.com/download)
+  - [MongoDB](https://docs.mongodb.com/manual/installation/)
+  - [NodeJS & npm](https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-ubuntu-18-04)
 
 ### Installing
 
 Configuring the project in your own workstation is easy. First, make sure the prerequisites tools and libraries are installed. Clone the project and install dependencies using `npm install` command. Once all the dependencies are set, go to root folder and run `node server.js`. It will display on which port the application has started and a link to access the API. You will require to set an environment variable for database connection.
 
-```
+```bash
 $ export DATABASE_URL=mongodb://localhost:27017/[db name here]
 ```
 
@@ -37,7 +37,7 @@ $ export DATABASE_URL=mongodb://localhost:27017/[db name here]
 
 API is fully integrated with unit testing and it covers almost 100% of source code. Tests can be run using the following command on a single test file by defining the file name or on the whole project by simply omitting the file name parameter.
 
-```
+```bash
 $ npm test <file-name>
 ```
 
@@ -47,4 +47,4 @@ This API is deployed in a free Heroku platform. There might be slight delays in 
 
 ## Maintainer
 
-* **Padmal**
+  - [Padmal](https://github.com/CloudyPadmal)
