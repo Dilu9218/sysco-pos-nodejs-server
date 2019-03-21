@@ -521,7 +521,7 @@ describe("Adds item to an order", function () {
     afterAll(async (done) => {
         await ItemModel.findOneAndDelete({ productID: "NE-WPOS-TME" }).then((res) => {
             done();
-        })
+        });
     });
 });
 
