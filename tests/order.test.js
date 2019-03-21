@@ -650,7 +650,7 @@ describe("Deleting an order", function () {
                     done();
                 });
             });
-        })
+        });
     });
 });
 
