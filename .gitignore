@@ -1,2 +1,4 @@
 /node_modules
 .env
+/coverage/lcov-report/prettify.js
+/coverage/lcov-report/base.css
